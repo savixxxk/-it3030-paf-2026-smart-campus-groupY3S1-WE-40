@@ -2,6 +2,7 @@ package com.campus.smart.security;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,12 +13,25 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
+
+	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
+	@Value("${spring.security.oauth2.client.registration.google.client-id:}")
+	private String googleClientId;
+
+	@Value("${spring.security.oauth2.client.registration.google.client-secret:}")
+	private String googleClientSecret;
+
+	public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler) {
+		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+	}
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -34,6 +48,10 @@ public class SecurityConfig {
 					.requestMatchers("/", "/error", "/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
 					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 					.anyRequest().permitAll());
+
+		if (StringUtils.hasText(googleClientId) && StringUtils.hasText(googleClientSecret)) {
+			http.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler));
+		}
 
 		return http.build();
 	}

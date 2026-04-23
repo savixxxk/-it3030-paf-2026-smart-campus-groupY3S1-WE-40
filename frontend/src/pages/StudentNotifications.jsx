@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { getStudentNotifications, markNotificationRead } from "../services/notificationService";
 import { useNavigate } from "react-router-dom";
 
@@ -17,6 +18,7 @@ const CATEGORY_COLORS = {
 
 export default function StudentNotifications() {
 	const { user } = useAuth();
+	const { isDark } = useTheme();
 	const navigate = useNavigate();
 	const [notifications, setNotifications] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -27,6 +29,31 @@ export default function StudentNotifications() {
 	}, [user?.email]);
 
 	const unreadCount = useMemo(() => notifications.filter((item) => !item.read).length, [notifications]);
+	const pageStyles = isDark
+		? {
+			main: "bg-slate-950 text-slate-100",
+			panel: "border-white/10 bg-white/5 backdrop-blur",
+			card: "border-white/10 bg-slate-900/60",
+			muted: "text-slate-300",
+			soft: "text-slate-400",
+			button: "bg-slate-800/70 text-slate-200 hover:bg-slate-700",
+			prefButton: "bg-cyan-400 text-slate-950 hover:bg-cyan-300",
+			badgeNew: "bg-amber-400/20 text-amber-200",
+			badgeRead: "bg-emerald-400/15 text-emerald-200",
+			categoryFallback: "bg-slate-400/15 text-slate-200"
+		}
+		: {
+			main: "bg-white text-slate-900",
+			panel: "border-slate-200 bg-slate-50 shadow-sm",
+			card: "border-slate-200 bg-white",
+			muted: "text-slate-600",
+			soft: "text-slate-500",
+			button: "bg-slate-900 text-white hover:bg-slate-700",
+			prefButton: "bg-cyan-600 text-white hover:bg-cyan-500",
+			badgeNew: "bg-amber-100 text-amber-700",
+			badgeRead: "bg-emerald-100 text-emerald-700",
+			categoryFallback: "bg-slate-100 text-slate-700"
+		};
 
 	const loadNotifications = async () => {
 		if (!user?.email) {
@@ -57,64 +84,64 @@ export default function StudentNotifications() {
 	};
 
 	return (
-		<main className="min-h-[calc(100vh-73px)] bg-slate-950 px-4 py-10 text-slate-100 sm:px-6 lg:px-8">
-			<section className="mx-auto max-w-5xl rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur md:p-8">
+		<main className={`min-h-[calc(100vh-73px)] px-4 py-10 sm:px-6 lg:px-8 ${pageStyles.main}`}>
+			<section className={`mx-auto max-w-5xl rounded-3xl border p-6 md:p-8 ${pageStyles.panel}`}>
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div>
-						<p className="inline-flex rounded-full border border-cyan-300/35 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
+						<p className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${isDark ? "border-cyan-300/35 bg-cyan-300/10 text-cyan-100" : "border-cyan-200 bg-cyan-50 text-cyan-700"}`}>
 							Student Notifications
 						</p>
-						<h1 className="mt-3 text-3xl font-black text-white">Campus Notices</h1>
-						<p className="mt-2 text-sm text-slate-300">Read the latest updates posted by the admin team.</p>
+						<h1 className={`mt-3 text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>Campus Notices</h1>
+						<p className={`mt-2 text-sm ${pageStyles.muted}`}>Read the latest updates posted by the admin team.</p>
 					</div>
 					<div className="flex flex-col gap-3">
-						<div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-center">
-							<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Unread</p>
-							<p className="text-2xl font-black text-cyan-200">{unreadCount}</p>
+						<div className={`rounded-2xl border px-4 py-3 text-center ${isDark ? "border-white/10 bg-slate-900/70" : "border-slate-200 bg-white"}`}>
+							<p className={`text-xs uppercase tracking-[0.2em] ${pageStyles.soft}`}>Unread</p>
+							<p className={`text-2xl font-black ${isDark ? "text-cyan-200" : "text-cyan-700"}`}>{unreadCount}</p>
 						</div>
 						<button
 							onClick={() => navigate("/notification-preferences")}
-							className="rounded-xl bg-slate-800/70 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700"
+							className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${pageStyles.button}`}
 						>
 							Manage Preferences
 						</button>
 					</div>
 				</div>
 
-				{loading ? <p className="mt-6 text-sm text-slate-300">Loading notifications...</p> : null}
-				{error ? <p className="mt-6 text-sm font-semibold text-rose-300">{error}</p> : null}
+				{loading ? <p className={`mt-6 text-sm ${pageStyles.muted}`}>Loading notifications...</p> : null}
+				{error ? <p className={`mt-6 text-sm font-semibold ${isDark ? "text-rose-300" : "text-rose-700"}`}>{error}</p> : null}
 
 				<div className="mt-6 space-y-3">
 					{!loading && notifications.length === 0 ? (
-						<p className="text-sm text-slate-300">No notifications available right now.</p>
+						<p className={`text-sm ${pageStyles.muted}`}>No notifications available right now.</p>
 					) : null}
 
 					{notifications.map((item) => (
-						<article key={item.id} className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
+						<article key={item.id} className={`rounded-2xl border p-4 ${pageStyles.card}`}>
 							<div className="flex flex-wrap items-start justify-between gap-2">
 								<div className="flex-1">
-									<h2 className="text-lg font-bold text-white">{item.title}</h2>
+									<h2 className={`text-lg font-bold ${isDark ? "text-white" : "text-slate-900"}`}>{item.title}</h2>
 									<div className="mt-1 flex flex-wrap items-center gap-2">
-										<span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${CATEGORY_COLORS[item.category] || "bg-slate-400/15 text-slate-200"}`}>
+										<span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isDark ? (CATEGORY_COLORS[item.category] || pageStyles.categoryFallback) : (item.category === "ACADEMIC_NOTICES" ? "bg-blue-100 text-blue-700" : item.category === "EVENTS_ACTIVITIES" ? "bg-emerald-100 text-emerald-700" : item.category === "MAINTENANCE_ALERTS" ? "bg-orange-100 text-orange-700" : pageStyles.categoryFallback)}`}>
 											{CATEGORIES[item.category] || item.category}
 										</span>
-										<p className="text-sm text-slate-400">{new Date(item.createdAt).toLocaleString()}</p>
+										<p className={`text-sm ${pageStyles.soft}`}>{new Date(item.createdAt).toLocaleString()}</p>
 									</div>
 								</div>
 								<span
 									className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
-										item.read ? "bg-emerald-400/15 text-emerald-200" : "bg-amber-400/20 text-amber-200"
+										item.read ? pageStyles.badgeRead : pageStyles.badgeNew
 									}`}
 								>
 									{item.read ? "Read" : "New"}
 								</span>
 							</div>
-							<p className="mt-3 text-sm leading-relaxed text-slate-200">{item.message}</p>
+							<p className={`mt-3 text-sm leading-relaxed ${isDark ? "text-slate-200" : "text-slate-700"}`}>{item.message}</p>
 
 							{item.read ? null : (
 								<button
 									onClick={() => handleMarkRead(item.id)}
-									className="mt-4 rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+									className="mt-4 rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 dark:bg-cyan-600 dark:text-white dark:hover:bg-cyan-500"
 								>
 									Mark as Read
 								</button>

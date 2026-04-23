@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import { getAnalyticsDashboard } from "../../services/analyticsService";
 import {
 	BarChart,
@@ -17,6 +18,7 @@ import {
 } from "recharts";
 
 export default function AdminAnalytics() {
+	const { isDark } = useTheme();
 	const [analytics, setAnalytics] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -42,8 +44,8 @@ export default function AdminAnalytics() {
 	if (loading) {
 		return (
 			<section className="space-y-6">
-				<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-					<p className="text-sm text-slate-300">Loading analytics...</p>
+				<div className={`rounded-3xl border p-6 ${isDark ? "border-white/10 bg-white/5 backdrop-blur" : "border-slate-200 bg-slate-50 shadow-sm"}`}>
+					<p className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}>Loading analytics...</p>
 				</div>
 			</section>
 		);
@@ -52,65 +54,88 @@ export default function AdminAnalytics() {
 	if (error) {
 		return (
 			<section className="space-y-6">
-				<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-					<p className="text-sm font-semibold text-rose-300">{error}</p>
+				<div className={`rounded-3xl border p-6 ${isDark ? "border-white/10 bg-white/5 backdrop-blur" : "border-slate-200 bg-slate-50 shadow-sm"}`}>
+					<p className={`text-sm font-semibold ${isDark ? "text-rose-300" : "text-rose-700"}`}>{error}</p>
 				</div>
 			</section>
 		);
 	}
 
 	const statusData = [
-		{ name: "Approved", value: analytics?.approvedBookings || 0, color: "#06b6d4" },
-		{ name: "Pending", value: analytics?.pendingBookings || 0, color: "#f59e0b" },
+		{ name: "Approved", value: analytics?.approvedBookings || 0, color: isDark ? "#06b6d4" : "#0891b2" },
+		{ name: "Pending", value: analytics?.pendingBookings || 0, color: isDark ? "#f59e0b" : "#d97706" },
 	];
 
 	const COLORS = ["#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+	const tooltipStyles = {
+		backgroundColor: isDark ? "#1e293b" : "#f1f5f9",
+		border: `1px solid ${isDark ? "#64748b" : "#cbd5e1"}`,
+		borderRadius: "8px",
+	};
+	const labelStyle = { color: isDark ? "#e2e8f0" : "#1e293b" };
 
 	return (
 		<section className="space-y-6">
 			{/* Key Metrics */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<div className="rounded-2xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-transparent p-6 backdrop-blur">
-					<p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total Bookings</p>
-					<p className="mt-2 text-3xl font-black text-cyan-200">{analytics?.totalBookings || 0}</p>
+				<div className={`rounded-2xl border bg-gradient-to-br p-6 ${
+					isDark
+						? "border-white/10 from-cyan-500/10 to-transparent"
+						: "border-cyan-200 from-cyan-50 to-transparent"
+				}`}>
+					<p className={`text-sm uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>Total Bookings</p>
+					<p className={`mt-2 text-3xl font-black ${isDark ? "text-cyan-200" : "text-cyan-700"}`}>
+						{analytics?.totalBookings || 0}
+					</p>
 				</div>
-				<div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/10 to-transparent p-6 backdrop-blur">
-					<p className="text-sm uppercase tracking-[0.2em] text-slate-400">Approved</p>
-					<p className="mt-2 text-3xl font-black text-emerald-200">{analytics?.approvedBookings || 0}</p>
+				<div className={`rounded-2xl border bg-gradient-to-br p-6 ${
+					isDark
+						? "border-white/10 from-emerald-500/10 to-transparent"
+						: "border-emerald-200 from-emerald-50 to-transparent"
+				}`}>
+					<p className={`text-sm uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>Approved</p>
+					<p className={`mt-2 text-3xl font-black ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>
+						{analytics?.approvedBookings || 0}
+					</p>
 				</div>
-				<div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-500/10 to-transparent p-6 backdrop-blur">
-					<p className="text-sm uppercase tracking-[0.2em] text-slate-400">Pending</p>
-					<p className="mt-2 text-3xl font-black text-amber-200">{analytics?.pendingBookings || 0}</p>
+				<div className={`rounded-2xl border bg-gradient-to-br p-6 ${
+					isDark
+						? "border-white/10 from-amber-500/10 to-transparent"
+						: "border-amber-200 from-amber-50 to-transparent"
+				}`}>
+					<p className={`text-sm uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>Pending</p>
+					<p className={`mt-2 text-3xl font-black ${isDark ? "text-amber-200" : "text-amber-700"}`}>
+						{analytics?.pendingBookings || 0}
+					</p>
 				</div>
-				<div className="rounded-2xl border border-white/10 bg-gradient-to-br from-purple-500/10 to-transparent p-6 backdrop-blur">
-					<p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total Resources</p>
-					<p className="mt-2 text-3xl font-black text-purple-200">{analytics?.totalResources || 0}</p>
+				<div className={`rounded-2xl border bg-gradient-to-br p-6 ${
+					isDark
+						? "border-white/10 from-purple-500/10 to-transparent"
+						: "border-purple-200 from-purple-50 to-transparent"
+				}`}>
+					<p className={`text-sm uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>Total Resources</p>
+					<p className={`mt-2 text-3xl font-black ${isDark ? "text-purple-200" : "text-purple-700"}`}>
+						{analytics?.totalResources || 0}
+					</p>
 				</div>
 			</div>
 
 			{/* Top Resources Chart */}
-			<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-				<h3 className="text-xl font-bold text-white">Top Resources by Bookings</h3>
+			<div className={`rounded-3xl border p-6 ${isDark ? "border-white/10 bg-white/5 backdrop-blur" : "border-slate-200 bg-slate-50 shadow-sm"}`}>
+				<h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>Top Resources by Bookings</h3>
 				<div className="mt-6 h-80">
 					{analytics?.topResources && analytics.topResources.length > 0 ? (
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={analytics.topResources}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
-								<XAxis dataKey="resourceName" stroke="#94a3b8" />
-								<YAxis stroke="#94a3b8" />
-								<Tooltip
-									contentStyle={{
-										backgroundColor: "#1e293b",
-										border: "1px solid #64748b",
-										borderRadius: "8px",
-									}}
-									labelStyle={{ color: "#e2e8f0" }}
-								/>
+								<CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff15" : "#e2e8f015"} />
+								<XAxis dataKey="resourceName" stroke={isDark ? "#94a3b8" : "#64748b"} />
+								<YAxis stroke={isDark ? "#94a3b8" : "#64748b"} />
+								<Tooltip contentStyle={tooltipStyles} labelStyle={labelStyle} />
 								<Bar dataKey="bookingCount" fill="#06b6d4" radius={[8, 8, 0, 0]} />
 							</BarChart>
 						</ResponsiveContainer>
 					) : (
-						<div className="flex items-center justify-center h-full text-slate-400">
+						<div className={`flex items-center justify-center h-full ${isDark ? "text-slate-400" : "text-slate-500"}`}>
 							<p>No booking data available</p>
 						</div>
 					)}
@@ -118,29 +143,20 @@ export default function AdminAnalytics() {
 			</div>
 
 			{/* Peak Hours Chart */}
-			<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-				<h3 className="text-xl font-bold text-white">Peak Booking Hours</h3>
+			<div className={`rounded-3xl border p-6 ${isDark ? "border-white/10 bg-white/5 backdrop-blur" : "border-slate-200 bg-slate-50 shadow-sm"}`}>
+				<h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>Peak Booking Hours</h3>
 				<div className="mt-6 h-80">
 					{analytics?.peakHours && analytics.peakHours.length > 0 ? (
 						<ResponsiveContainer width="100%" height="100%">
 							<LineChart data={analytics.peakHours}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
+								<CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff15" : "#e2e8f015"} />
 								<XAxis
 									dataKey="hour"
-									stroke="#94a3b8"
+									stroke={isDark ? "#94a3b8" : "#64748b"}
 									tickFormatter={(hour) => `${hour}:00`}
 								/>
-								<YAxis stroke="#94a3b8" />
-								<Tooltip
-									contentStyle={{
-										backgroundColor: "#1e293b",
-										border: "1px solid #64748b",
-										borderRadius: "8px",
-									}}
-									labelStyle={{ color: "#e2e8f0" }}
-									formatter={(value) => [value, "Bookings"]}
-									labelFormatter={(hour) => `${hour}:00`}
-								/>
+								<YAxis stroke={isDark ? "#94a3b8" : "#64748b"} />
+								<Tooltip contentStyle={tooltipStyles} labelStyle={labelStyle} formatter={(value) => [value, "Bookings"]} labelFormatter={(hour) => `${hour}:00`} />
 								<Legend />
 								<Line
 									type="monotone"
@@ -154,7 +170,7 @@ export default function AdminAnalytics() {
 							</LineChart>
 						</ResponsiveContainer>
 					) : (
-						<div className="flex items-center justify-center h-full text-slate-400">
+						<div className={`flex items-center justify-center h-full ${isDark ? "text-slate-400" : "text-slate-500"}`}>
 							<p>No hourly data available</p>
 						</div>
 					)}
@@ -164,8 +180,8 @@ export default function AdminAnalytics() {
 			{/* Booking Status & Usage Stats */}
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 				{/* Booking Status Pie Chart */}
-				<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-					<h3 className="text-xl font-bold text-white">Booking Status Distribution</h3>
+				<div className={`rounded-3xl border p-6 ${isDark ? "border-white/10 bg-white/5 backdrop-blur" : "border-slate-200 bg-slate-50 shadow-sm"}`}>
+					<h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>Booking Status Distribution</h3>
 					<div className="mt-6 h-80">
 						{statusData.some((d) => d.value > 0) ? (
 							<ResponsiveContainer width="100%" height="100%">
@@ -184,18 +200,11 @@ export default function AdminAnalytics() {
 											<Cell key={`cell-${index}`} fill={entry.color} />
 										))}
 									</Pie>
-									<Tooltip
-										contentStyle={{
-											backgroundColor: "#1e293b",
-											border: "1px solid #64748b",
-											borderRadius: "8px",
-										}}
-										labelStyle={{ color: "#e2e8f0" }}
-									/>
+									<Tooltip contentStyle={tooltipStyles} labelStyle={labelStyle} />
 								</PieChart>
 							</ResponsiveContainer>
 						) : (
-							<div className="flex items-center justify-center h-full text-slate-400">
+							<div className={`flex items-center justify-center h-full ${isDark ? "text-slate-400" : "text-slate-500"}`}>
 								<p>No status data available</p>
 							</div>
 						)}
@@ -203,30 +212,46 @@ export default function AdminAnalytics() {
 				</div>
 
 				{/* Usage Statistics */}
-				<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-					<h3 className="text-xl font-bold text-white">Usage Statistics</h3>
+				<div className={`rounded-3xl border p-6 ${isDark ? "border-white/10 bg-white/5 backdrop-blur" : "border-slate-200 bg-slate-50 shadow-sm"}`}>
+					<h3 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>Usage Statistics</h3>
 					<div className="mt-6 space-y-4">
-						<div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-							<p className="text-sm text-slate-400">This Month Bookings</p>
-							<p className="mt-2 text-2xl font-bold text-cyan-200">
+						<div className={`rounded-2xl border p-4 ${
+							isDark
+								? "border-white/10 bg-slate-900/40"
+								: "border-slate-300 bg-white"
+						}`}>
+							<p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>This Month Bookings</p>
+							<p className={`mt-2 text-2xl font-bold ${isDark ? "text-cyan-200" : "text-cyan-700"}`}>
 								{analytics?.usageStats?.thisMonthBookings || 0}
 							</p>
 						</div>
-						<div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-							<p className="text-sm text-slate-400">Avg Booking Duration</p>
-							<p className="mt-2 text-2xl font-bold text-emerald-200">
+						<div className={`rounded-2xl border p-4 ${
+							isDark
+								? "border-white/10 bg-slate-900/40"
+								: "border-slate-300 bg-white"
+						}`}>
+							<p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>Avg Booking Duration</p>
+							<p className={`mt-2 text-2xl font-bold ${isDark ? "text-emerald-200" : "text-emerald-700"}`}>
 								{analytics?.usageStats?.averageBookingDuration?.toFixed(1) || 0}h
 							</p>
 						</div>
-						<div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-							<p className="text-sm text-slate-400">Most Used Hour</p>
-							<p className="mt-2 text-2xl font-bold text-amber-200">
+						<div className={`rounded-2xl border p-4 ${
+							isDark
+								? "border-white/10 bg-slate-900/40"
+								: "border-slate-300 bg-white"
+						}`}>
+							<p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>Most Used Hour</p>
+							<p className={`mt-2 text-2xl font-bold ${isDark ? "text-amber-200" : "text-amber-700"}`}>
 								{analytics?.usageStats?.mostUsedHour}:00
 							</p>
 						</div>
-						<div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-							<p className="text-sm text-slate-400">Resource Utilization</p>
-							<p className="mt-2 text-2xl font-bold text-purple-200">
+						<div className={`rounded-2xl border p-4 ${
+							isDark
+								? "border-white/10 bg-slate-900/40"
+								: "border-slate-300 bg-white"
+						}`}>
+							<p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-600"}`}>Resource Utilization</p>
+							<p className={`mt-2 text-2xl font-bold ${isDark ? "text-purple-200" : "text-purple-700"}`}>
 								{analytics?.usageStats?.utilization?.toFixed(1) || 0}%
 							</p>
 						</div>
