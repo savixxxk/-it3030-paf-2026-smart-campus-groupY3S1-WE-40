@@ -2,51 +2,53 @@ import { createContext, createElement, useContext, useMemo, useState } from "rea
 import { loginUser, registerUser } from "../services/authService";
 
 const AuthContext = createContext(null);
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "Admin@1";
-const ADMIN_NAME = "admin";
 
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(() => {
 		const saved = localStorage.getItem("smart-campus-user");
 		return saved ? JSON.parse(saved) : null;
 	});
+	const [token, setToken] = useState(() => localStorage.getItem("smart-campus-token") || "");
 
-	const login = async (payload) => {
-		let data;
-
-		if (payload.email?.toLowerCase() === ADMIN_EMAIL && payload.password === ADMIN_PASSWORD) {
-			data = { fullName: ADMIN_NAME, email: ADMIN_EMAIL, role: "ADMIN" };
-		} else {
-			data = await loginUser(payload);
-		}
-
+	const persistSession = (data) => {
 		setUser(data);
 		localStorage.setItem("smart-campus-user", JSON.stringify(data));
+		if (data?.token) {
+			setToken(data.token);
+			localStorage.setItem("smart-campus-token", data.token);
+		} else {
+			setToken("");
+			localStorage.removeItem("smart-campus-token");
+		}
+	};
+
+	const login = async (payload) => {
+		const data = await loginUser(payload);
+		persistSession(data);
 		return data;
 	};
 
 	const completeOAuthLogin = (payload) => {
-		setUser(payload);
-		localStorage.setItem("smart-campus-user", JSON.stringify(payload));
+		persistSession(payload);
 		return payload;
 	};
 
 	const register = async (payload) => {
 		const data = await registerUser(payload);
-		setUser(data);
-		localStorage.setItem("smart-campus-user", JSON.stringify(data));
+		persistSession(data);
 		return data;
 	};
 
 	const logout = () => {
 		setUser(null);
+		setToken("");
 		localStorage.removeItem("smart-campus-user");
+		localStorage.removeItem("smart-campus-token");
 	};
 
 	const value = useMemo(
-		() => ({ user, isAuthenticated: Boolean(user), login, register, logout, completeOAuthLogin }),
-		[user]
+		() => ({ user, token, isAuthenticated: Boolean(user), login, register, logout, completeOAuthLogin }),
+		[user, token]
 	);
 
 	return createElement(AuthContext.Provider, { value }, children);

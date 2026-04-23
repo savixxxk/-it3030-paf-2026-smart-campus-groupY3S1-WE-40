@@ -2,6 +2,8 @@ package com.campus.smart.repository;
 
 import java.util.Optional;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.campus.smart.model.Role;
@@ -13,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	boolean existsByEmail(String email);
 
 	boolean existsByEmailAndRole(String email, Role role);
+
+	List<User> findAllByOrderByCreatedAtDesc();
 }

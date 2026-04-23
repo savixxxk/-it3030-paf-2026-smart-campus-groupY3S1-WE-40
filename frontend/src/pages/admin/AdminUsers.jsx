@@ -23,12 +23,8 @@ export default function AdminUsers() {
 		setRows((current) => current.map((user) => (user.id === userId ? { ...user, role } : user)));
 	};
 
-	const toggleStatus = (userId) => {
-		setRows((current) =>
-			current.map((user) =>
-				user.id === userId ? { ...user, status: user.status === "Active" ? "Disabled" : "Active" } : user
-			)
-		);
+	const setStatus = (userId, status) => {
+		setRows((current) => current.map((user) => (user.id === userId ? { ...user, status } : user)));
 	};
 
 	return (
@@ -126,14 +122,30 @@ export default function AdminUsers() {
 													Change role
 												</button>
 												<button
-													onClick={() => toggleStatus(user.id)}
+													onClick={() => setStatus(user.id, "Active")}
+													disabled={user.status === "Active"}
 													className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
-														isDark
+														user.status === "Active"
+															? "cursor-not-allowed border-emerald-300 bg-emerald-100 text-emerald-400"
+															: isDark
+															? "border-emerald-300/30 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20"
+															: "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+													}`}
+												>
+													Active
+												</button>
+												<button
+													onClick={() => setStatus(user.id, "Disabled")}
+													disabled={user.status === "Disabled"}
+													className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+														user.status === "Disabled"
+															? "cursor-not-allowed border-rose-300 bg-rose-100 text-rose-400"
+															: isDark
 															? "border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20"
 															: "border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100"
 													}`}
 												>
-													Disable user
+													Disable
 												</button>
 											</div>
 										</td>

@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import com.campus.smart.enums.NotificationCategory;
+import com.campus.smart.enums.NotificationPriority;
 
 @Entity
 @Table(name = "notifications")
@@ -30,6 +31,10 @@ public class Notification {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private NotificationCategory category = NotificationCategory.ACADEMIC_NOTICES;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private NotificationPriority priority = NotificationPriority.MEDIUM;
 
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
@@ -73,5 +78,13 @@ public class Notification {
 
 	public void setCategory(NotificationCategory category) {
 		this.category = category;
+	}
+
+	public NotificationPriority getPriority() {
+		return priority;
+	}
+
+	public void setPriority(NotificationPriority priority) {
+		this.priority = priority;
 	}
 }

@@ -5,15 +5,23 @@ import { getStudentNotifications, markNotificationRead } from "../services/notif
 import { useNavigate } from "react-router-dom";
 
 const CATEGORIES = {
+	BOOKING: "Booking",
+	TICKETS: "Tickets",
 	ACADEMIC_NOTICES: "Academic Notices",
-	EVENTS_ACTIVITIES: "Events & Activities",
 	MAINTENANCE_ALERTS: "Maintenance Alerts"
 };
 
 const CATEGORY_COLORS = {
+	BOOKING: "bg-cyan-400/15 text-cyan-200",
+	TICKETS: "bg-indigo-400/15 text-indigo-200",
 	ACADEMIC_NOTICES: "bg-blue-400/15 text-blue-200",
-	EVENTS_ACTIVITIES: "bg-emerald-400/15 text-emerald-200",
 	MAINTENANCE_ALERTS: "bg-orange-400/15 text-orange-200"
+};
+
+const PRIORITY_COLORS = {
+	HIGH: "bg-rose-400/15 text-rose-200",
+	MEDIUM: "bg-amber-400/15 text-amber-200",
+	LOW: "bg-emerald-400/15 text-emerald-200"
 };
 
 export default function StudentNotifications() {
@@ -125,6 +133,9 @@ export default function StudentNotifications() {
 										<span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isDark ? (CATEGORY_COLORS[item.category] || pageStyles.categoryFallback) : (item.category === "ACADEMIC_NOTICES" ? "bg-blue-100 text-blue-700" : item.category === "EVENTS_ACTIVITIES" ? "bg-emerald-100 text-emerald-700" : item.category === "MAINTENANCE_ALERTS" ? "bg-orange-100 text-orange-700" : pageStyles.categoryFallback)}`}>
 											{CATEGORIES[item.category] || item.category}
 										</span>
+											<span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${isDark ? (PRIORITY_COLORS[item.priority] || "bg-slate-400/15 text-slate-200") : item.priority === "HIGH" ? "bg-rose-100 text-rose-700" : item.priority === "LOW" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+												{item.priority || "MEDIUM"}
+											</span>
 										<p className={`text-sm ${pageStyles.soft}`}>{new Date(item.createdAt).toLocaleString()}</p>
 									</div>
 								</div>

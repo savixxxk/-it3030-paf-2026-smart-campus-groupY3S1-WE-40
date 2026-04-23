@@ -3,9 +3,16 @@ import { useTheme } from "../../context/ThemeContext";
 import { createNotification, getAdminNotifications } from "../../services/notificationService";
 
 const CATEGORIES = {
+	BOOKING: "Booking",
+	TICKETS: "Tickets",
 	ACADEMIC_NOTICES: "Academic Notices",
-	EVENTS_ACTIVITIES: "Events & Activities",
 	MAINTENANCE_ALERTS: "Maintenance Alerts"
+};
+
+const PRIORITIES = {
+	HIGH: "High",
+	MEDIUM: "Medium",
+	LOW: "Low"
 };
 
 export default function AdminNotifications() {
@@ -13,6 +20,7 @@ export default function AdminNotifications() {
 	const [title, setTitle] = useState("");
 	const [message, setMessage] = useState("");
 	const [category, setCategory] = useState("ACADEMIC_NOTICES");
+	const [priority, setPriority] = useState("MEDIUM");
 	const [notifications, setNotifications] = useState([]);
 	const [status, setStatus] = useState("");
 	const [error, setError] = useState("");
@@ -36,10 +44,11 @@ export default function AdminNotifications() {
 		setStatus("");
 
 		try {
-			await createNotification({ title, message, category });
+			await createNotification({ title, message, category, priority });
 			setTitle("");
 			setMessage("");
 			setCategory("ACADEMIC_NOTICES");
+			setPriority("MEDIUM");
 			setStatus("Notification posted successfully.");
 			await loadNotifications();
 		} catch (submitError) {
@@ -87,9 +96,29 @@ export default function AdminNotifications() {
 									: "border-slate-300 bg-white text-slate-900 focus:border-cyan-300"
 							}`}
 						>
+							<option value="BOOKING">Booking</option>
+							<option value="TICKETS">Tickets</option>
 							<option value="ACADEMIC_NOTICES">Academic Notices</option>
-							<option value="EVENTS_ACTIVITIES">Events & Activities</option>
 							<option value="MAINTENANCE_ALERTS">Maintenance Alerts</option>
+						</select>
+					</div>
+					<div>
+						<label className={`mb-2 block text-sm font-semibold ${isDark ? "text-slate-200" : "text-slate-700"}`} htmlFor="notice-priority">
+							Priority
+						</label>
+						<select
+							id="notice-priority"
+							value={priority}
+							onChange={(event) => setPriority(event.target.value)}
+							className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${
+								isDark
+									? "border-white/15 bg-slate-900/70 text-white focus:border-cyan-300/50"
+									: "border-slate-300 bg-white text-slate-900 focus:border-cyan-300"
+							}`}
+						>
+							<option value="HIGH">High</option>
+							<option value="MEDIUM">Medium</option>
+							<option value="LOW">Low</option>
 						</select>
 					</div>
 					<div>
@@ -147,6 +176,9 @@ export default function AdminNotifications() {
 											: "bg-purple-100 text-purple-700"
 									}`}>
 										{CATEGORIES[item.category] || item.category}
+									</span>
+									<span className={`inline-block rounded-full px-2 py-1 text-xs font-semibold ${item.priority === "HIGH" ? (isDark ? "bg-rose-400/20 text-rose-100" : "bg-rose-100 text-rose-700") : item.priority === "LOW" ? (isDark ? "bg-emerald-400/20 text-emerald-100" : "bg-emerald-100 text-emerald-700") : (isDark ? "bg-amber-400/20 text-amber-100" : "bg-amber-100 text-amber-700")}`}>
+										{PRIORITIES[item.priority] || item.priority || "Medium"}
 									</span>
 								</div>
 								<p className={`mt-2 text-sm ${isDark ? "text-slate-200" : "text-slate-600"}`}>{item.message}</p>

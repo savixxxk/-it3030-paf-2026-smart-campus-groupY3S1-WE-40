@@ -18,12 +18,13 @@ export default function OAuth2Bridge() {
 		const name = params.get("name") || "Google User";
 		const email = params.get("email") || "";
 		const role = params.get("role") || "USER";
+		const token = params.get("token") || "";
 
 		if (!email) {
 			return;
 		}
 
-		completeOAuthLogin({ fullName: name, email, role });
+		completeOAuthLogin({ fullName: name, email, role, token });
 		navigate("/", { replace: true });
 	}, [completeOAuthLogin, location.search, navigate]);
 

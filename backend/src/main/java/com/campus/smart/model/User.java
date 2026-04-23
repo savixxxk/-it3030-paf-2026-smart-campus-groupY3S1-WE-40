@@ -29,6 +29,18 @@ public class User {
 	@Column(nullable = true)
 	private String password;
 
+	@Column(nullable = false)
+	private boolean active = true;
+
+	@Column(nullable = true)
+	private LocalDateTime lastLoginAt;
+
+	@Column(nullable = false)
+	private int loginCount = 0;
+
+	@Column(nullable = false)
+	private boolean doNotDisturb = false;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Role role = Role.USER;
@@ -79,6 +91,38 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public LocalDateTime getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
+	public int getLoginCount() {
+		return loginCount;
+	}
+
+	public void setLoginCount(int loginCount) {
+		this.loginCount = loginCount;
+	}
+
+	public boolean isDoNotDisturb() {
+		return doNotDisturb;
+	}
+
+	public void setDoNotDisturb(boolean doNotDisturb) {
+		this.doNotDisturb = doNotDisturb;
 	}
 
 	public Role getRole() {

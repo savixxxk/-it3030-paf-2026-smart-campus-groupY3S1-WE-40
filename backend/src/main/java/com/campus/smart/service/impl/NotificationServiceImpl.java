@@ -47,6 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
 		notification.setTitle(request.getTitle().trim());
 		notification.setMessage(request.getMessage().trim());
 		notification.setCategory(request.getCategory());
+		notification.setPriority(request.getPriority());
 
 		Notification saved = notificationRepository.save(notification);
 		return toView(saved, false);
@@ -66,6 +67,10 @@ public class NotificationServiceImpl implements NotificationService {
 
 		if (user.getRole() == Role.ADMIN) {
 			throw new IllegalArgumentException("Notifications page is for students only");
+		}
+
+		if (user.isDoNotDisturb()) {
+			return List.of();
 		}
 
 		// Ensure user has preferences initialized
@@ -89,6 +94,10 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void markAsRead(Long notificationId, String email) {
+		if (notificationId == null) {
+			throw new IllegalArgumentException("Notification not found");
+		}
+
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -150,12 +159,28 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	@Override
+	public boolean getDoNotDisturb(String email) {
+		return userRepository.findByEmail(email)
+				.map(User::isDoNotDisturb)
+				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+	}
+
+	@Override
+	public void updateDoNotDisturb(String email, boolean enabled) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+		user.setDoNotDisturb(enabled);
+		userRepository.save(user);
+	}
+
 	private NotificationView toView(Notification notification, boolean isRead) {
 		return new NotificationView(
 				notification.getId(),
 				notification.getTitle(),
 				notification.getMessage(),
 				notification.getCategory(),
+				notification.getPriority(),
 				notification.getCreatedAt(),
 				isRead
 		);

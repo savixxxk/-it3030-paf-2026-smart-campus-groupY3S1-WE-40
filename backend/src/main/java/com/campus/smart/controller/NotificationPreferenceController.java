@@ -39,4 +39,15 @@ public class NotificationPreferenceController {
 		notificationService.updatePreference(email, request.getCategory(), request.getEnabled());
 		return ResponseEntity.status(HttpStatus.OK).body(Map.of("status", "updated"));
 	}
+
+	@GetMapping("/dnd")
+	public Map<String, Boolean> getDnd(@RequestParam String email) {
+		return Map.of("enabled", notificationService.getDoNotDisturb(email));
+	}
+
+	@PutMapping("/dnd")
+	public ResponseEntity<Map<String, String>> updateDnd(@RequestParam String email, @RequestBody Map<String, Boolean> payload) {
+		notificationService.updateDoNotDisturb(email, Boolean.TRUE.equals(payload.get("enabled")));
+		return ResponseEntity.ok(Map.of("status", "updated"));
+	}
 }

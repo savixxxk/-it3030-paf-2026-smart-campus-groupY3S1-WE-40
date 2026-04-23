@@ -1,7 +1,10 @@
 package com.campus.smart.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.campus.smart.dto.LoginAuditView;
 import com.campus.smart.model.LoginAudit;
 import com.campus.smart.model.Role;
 import com.campus.smart.repository.LoginAuditRepository;
@@ -37,5 +40,20 @@ public class LoginAuditServiceImpl implements LoginAuditService {
 		audit.setSuccessful(false);
 		audit.setFailureReason(reason);
 		loginAuditRepository.save(audit);
+	}
+
+	@Override
+	public List<LoginAuditView> getHistory(String email) {
+		return loginAuditRepository.findTop20ByEmailOrderByCreatedAtDesc(email).stream()
+				.map(audit -> new LoginAuditView(
+						audit.getId(),
+						audit.getEmail(),
+						audit.getName(),
+						audit.getLoginMethod(),
+						audit.getRole().name(),
+						audit.isSuccessful(),
+						audit.getFailureReason(),
+						audit.getCreatedAt()))
+				.toList();
 	}
 }

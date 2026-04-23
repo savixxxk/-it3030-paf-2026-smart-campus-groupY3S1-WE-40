@@ -21,4 +21,8 @@ public interface NotificationService {
 	void updatePreference(String email, NotificationCategory category, Boolean enabled);
 
 	void initializePreferencesForUser(String email);
+
+	boolean getDoNotDisturb(String email);
+
+	void updateDoNotDisturb(String email, boolean enabled);
 }

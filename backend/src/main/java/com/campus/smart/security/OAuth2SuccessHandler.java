@@ -27,13 +27,15 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
 	private final UserRepository userRepository;
 	private final LoginAuditService loginAuditService;
+	private final JwtService jwtService;
 
 	@Value("${app.oauth2.frontend-success-url:http://localhost:5173/login}")
 	private String frontendSuccessUrl;
 
-	public OAuth2SuccessHandler(UserRepository userRepository, LoginAuditService loginAuditService) {
+	public OAuth2SuccessHandler(UserRepository userRepository, LoginAuditService loginAuditService, JwtService jwtService) {
 		this.userRepository = userRepository;
 		this.loginAuditService = loginAuditService;
+		this.jwtService = jwtService;
 	}
 
 	@Override
@@ -71,13 +73,19 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 			userRepository.save(user);
 		}
 
+		user.setLastLoginAt(java.time.LocalDateTime.now());
+		user.setLoginCount(user.getLoginCount() + 1);
+		userRepository.save(user);
+
 		loginAuditService.recordSuccess(user.getEmail(), user.getName(), user.getRole(), "GOOGLE");
+		String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
 
 		String redirectUrl = frontendSuccessUrl
 				+ "?oauth=success"
 				+ "&name=" + URLEncoder.encode(user.getName(), StandardCharsets.UTF_8)
 				+ "&email=" + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8)
-				+ "&role=" + URLEncoder.encode(user.getRole().name(), StandardCharsets.UTF_8);
+				+ "&role=" + URLEncoder.encode(user.getRole().name(), StandardCharsets.UTF_8)
+				+ "&token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
 
 		new DefaultRedirectStrategy().sendRedirect(request, response, redirectUrl);
 	}

@@ -37,6 +37,9 @@ public class LoginAudit {
 	private boolean successful;
 
 	@Column(nullable = true)
+	private String token;
+
+	@Column(nullable = true)
 	private String failureReason;
 
 	@Column(nullable = false, updatable = false)
@@ -93,6 +96,14 @@ public class LoginAudit {
 
 	public void setSuccessful(boolean successful) {
 		this.successful = successful;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 	public String getFailureReason() {

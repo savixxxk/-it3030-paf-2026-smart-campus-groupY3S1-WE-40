@@ -12,8 +12,14 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.util.StringUtils;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,15 +28,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+	private final JwtAuthFilter jwtAuthFilter;
 
-	@Value("${spring.security.oauth2.client.registration.google.client-id:}")
+	@Value("${spring.security.oauth2.client.registration.google.client-id}")
 	private String googleClientId;
 
-	@Value("${spring.security.oauth2.client.registration.google.client-secret:}")
+	@Value("${spring.security.oauth2.client.registration.google.client-secret}")
 	private String googleClientSecret;
 
-	public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler) {
+	public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler, JwtAuthFilter jwtAuthFilter) {
 		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+		this.jwtAuthFilter = jwtAuthFilter;
 	}
 
 	@Bean
@@ -43,17 +51,37 @@ public class SecurityConfig {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(Customizer.withDefaults())
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/", "/error", "/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
+					.requestMatchers("/", "/error", "/api/auth/**", "/oauth2/**", "/login/oauth2/**", "/api/users/health").permitAll()
 					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+					.requestMatchers("/api/notifications/admin", "/api/users/**").hasRole("ADMIN")
+					.requestMatchers("/api/**").authenticated()
 					.anyRequest().permitAll());
 
-		if (StringUtils.hasText(googleClientId) && StringUtils.hasText(googleClientSecret)) {
-			http.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler));
-		}
+		http.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler));
 
 		return http.build();
+	}
+
+	@Bean
+	public ClientRegistrationRepository clientRegistrationRepository() {
+		ClientRegistration google = ClientRegistration.withRegistrationId("google")
+				.clientId(googleClientId)
+				.clientSecret(googleClientSecret)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+				.scope("profile", "email")
+				.authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+				.tokenUri("https://oauth2.googleapis.com/token")
+				.userInfoUri("https://openidconnect.googleapis.com/v1/userinfo")
+				.userNameAttributeName(IdTokenClaimNames.SUB)
+				.clientName("Google")
+				.build();
+
+		return new InMemoryClientRegistrationRepository(google);
 	}
 
 	@Bean

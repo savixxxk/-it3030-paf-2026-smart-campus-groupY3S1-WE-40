@@ -1,5 +1,7 @@
 package com.campus.smart.dto;
 
+import java.time.LocalDateTime;
+
 import com.campus.smart.model.Role;
 
 import jakarta.validation.constraints.Email;
@@ -19,6 +21,16 @@ public class UserDTO {
 	private String password;
 
 	private Role role;
+
+	private String token;
+
+	private LocalDateTime lastLoginAt;
+
+	private Integer loginCount;
+
+	private Boolean active;
+
+	private Boolean doNotDisturb;
 
 	public String getFullName() {
 		return fullName;
@@ -50,5 +62,45 @@ public class UserDTO {
 
 	public void setRole(Role role) {
 		this.role = role;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public LocalDateTime getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
+	public Integer getLoginCount() {
+		return loginCount;
+	}
+
+	public void setLoginCount(Integer loginCount) {
+		this.loginCount = loginCount;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public Boolean getDoNotDisturb() {
+		return doNotDisturb;
+	}
+
+	public void setDoNotDisturb(Boolean doNotDisturb) {
+		this.doNotDisturb = doNotDisturb;
 	}
 }
