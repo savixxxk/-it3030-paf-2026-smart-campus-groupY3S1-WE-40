@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
     Optional<Resource> findByName(String name);
     List<Resource> findByAvailableTrue();
+    List<Resource> findByNameContainingIgnoreCaseOrLocationContainingIgnoreCase(String name, String location);
 }

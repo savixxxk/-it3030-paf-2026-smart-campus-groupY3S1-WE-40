@@ -15,6 +15,10 @@ const CATEGORIES = {
 	MAINTENANCE_ALERTS: {
 		name: "Maintenance Alerts",
 		description: "Facility maintenance notifications and service updates"
+	},
+	BOOKING_UPDATES: {
+		name: "Booking Updates",
+		description: "Approval, rejection, and cancellation updates for your bookings"
 	}
 };
 

@@ -19,6 +19,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
+	private final OAuth2SuccessHandler oauth2SuccessHandler;
+
+	public SecurityConfig(OAuth2SuccessHandler oauth2SuccessHandler) {
+		this.oauth2SuccessHandler = oauth2SuccessHandler;
+	}
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -30,6 +36,7 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(Customizer.withDefaults())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+			.oauth2Login(oauth2 -> oauth2.successHandler(oauth2SuccessHandler))
 			.authorizeHttpRequests(auth -> auth
 					.requestMatchers("/", "/error", "/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
 					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

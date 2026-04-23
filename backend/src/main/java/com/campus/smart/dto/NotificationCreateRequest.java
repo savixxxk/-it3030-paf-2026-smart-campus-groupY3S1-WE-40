@@ -1,6 +1,7 @@
 package com.campus.smart.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import com.campus.smart.enums.NotificationCategory;
 
@@ -14,6 +15,9 @@ public class NotificationCreateRequest {
 
 	@NotNull(message = "Category is required")
 	private NotificationCategory category;
+
+	@Email(message = "Invalid target email")
+	private String targetEmail;
 
 	public String getTitle() {
 		return title;
@@ -37,5 +41,13 @@ public class NotificationCreateRequest {
 
 	public void setCategory(NotificationCategory category) {
 		this.category = category;
+	}
+
+	public String getTargetEmail() {
+		return targetEmail;
+	}
+
+	public void setTargetEmail(String targetEmail) {
+		this.targetEmail = targetEmail;
 	}
 }

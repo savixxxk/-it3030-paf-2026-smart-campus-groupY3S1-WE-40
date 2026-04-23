@@ -33,6 +33,11 @@ public class Booking {
     @Column(length = 500)
     private String purpose;
 
+    private Integer expectedAttendees;
+
+    @Column(length = 500)
+    private String adminReason;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -104,6 +109,22 @@ public class Booking {
 
     public void setPurpose(String purpose) {
         this.purpose = purpose;
+    }
+
+    public Integer getExpectedAttendees() {
+        return expectedAttendees;
+    }
+
+    public void setExpectedAttendees(Integer expectedAttendees) {
+        this.expectedAttendees = expectedAttendees;
+    }
+
+    public String getAdminReason() {
+        return adminReason;
+    }
+
+    public void setAdminReason(String adminReason) {
+        this.adminReason = adminReason;
     }
 
     public LocalDateTime getCreatedAt() {

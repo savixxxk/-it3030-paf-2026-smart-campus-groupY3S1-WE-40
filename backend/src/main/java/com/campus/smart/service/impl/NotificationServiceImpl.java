@@ -47,6 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
 		notification.setTitle(request.getTitle().trim());
 		notification.setMessage(request.getMessage().trim());
 		notification.setCategory(request.getCategory());
+		notification.setTargetEmail(request.getTargetEmail());
 
 		Notification saved = notificationRepository.save(notification);
 		return toView(saved, false);
@@ -82,6 +83,8 @@ public class NotificationServiceImpl implements NotificationService {
 				.collect(Collectors.toSet());
 
 		return notifications.stream()
+				.filter(notification -> notification.getTargetEmail() == null
+						|| notification.getTargetEmail().equalsIgnoreCase(email))
 				.filter(notification -> preferences.getOrDefault(notification.getCategory(), true))
 				.map(notification -> toView(notification, readIds.contains(notification.getId())))
 				.toList();

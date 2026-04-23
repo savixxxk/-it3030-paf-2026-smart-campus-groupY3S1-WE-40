@@ -31,6 +31,9 @@ public class Notification {
 	@Column(nullable = false)
 	private NotificationCategory category = NotificationCategory.ACADEMIC_NOTICES;
 
+	@Column(name = "target_email")
+	private String targetEmail;
+
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
@@ -61,6 +64,14 @@ public class Notification {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getTargetEmail() {
+		return targetEmail;
+	}
+
+	public void setTargetEmail(String targetEmail) {
+		this.targetEmail = targetEmail;
 	}
 
 	public LocalDateTime getCreatedAt() {

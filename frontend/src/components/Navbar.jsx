@@ -22,9 +22,14 @@ export default function Navbar() {
 									Admin Dashboard
 								</Link>
 							) : (
-								<Link to="/notifications" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-									Notifications
-								</Link>
+								<>
+									<Link to="/bookings" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+										Bookings
+									</Link>
+									<Link to="/notifications" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+										Notifications
+									</Link>
+								</>
 							)}
 							<span className="hidden text-sm text-slate-600 md:block">{user?.fullName}</span>
 							<button
