@@ -17,7 +17,9 @@ import AdminTickets from "./pages/admin/AdminTickets";
 import StudentNotifications from "./pages/StudentNotifications";
 import NotificationPreferences from "./pages/NotificationPreferences";
 import PrivateRoute from "./routes/PrivateRoute";
-import StudentBookings from "./pages/StudentBookings";
+import MyBookings from "./pages/MyBookings";
+import MyTickets from "./pages/MyTickets";
+import TicketDetails from "./pages/TicketDetails";
 
 export default function App() {
 	return (
@@ -38,18 +40,34 @@ export default function App() {
 						}
 					/>
 					<Route
-						path="/bookings"
-						element={
-							<PrivateRoute>
-								<StudentBookings />
-							</PrivateRoute>
-						}
-					/>
-					<Route
 						path="/notification-preferences"
 						element={
 							<PrivateRoute>
 								<NotificationPreferences />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path="/my-bookings"
+						element={
+							<PrivateRoute>
+								<MyBookings />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path="/my-tickets"
+						element={
+							<PrivateRoute>
+								<MyTickets />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path="/tickets/:id"
+						element={
+							<PrivateRoute>
+								<TicketDetails />
 							</PrivateRoute>
 						}
 					/>

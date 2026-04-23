@@ -1,35 +1,30 @@
 package com.campus.smart.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class BookingCreateRequest {
-
-	@NotBlank
-	private String userEmail;
-
-	@NotNull
+	@NotNull(message = "resourceId is required")
 	private Long resourceId;
 
-	@NotNull
-	private LocalDateTime startTime;
+	@NotNull(message = "date is required")
+	private LocalDate date;
 
-	@NotNull
-	private LocalDateTime endTime;
+	@NotNull(message = "startTime is required")
+	private LocalTime startTime;
 
+	@NotNull(message = "endTime is required")
+	private LocalTime endTime;
+
+	@NotBlank(message = "purpose is required")
 	private String purpose;
 
-	private Integer expectedAttendees;
-
-	public String getUserEmail() {
-		return userEmail;
-	}
-
-	public void setUserEmail(String userEmail) {
-		this.userEmail = userEmail;
-	}
+	@Positive(message = "attendees must be positive")
+	private Integer attendees;
 
 	public Long getResourceId() {
 		return resourceId;
@@ -39,19 +34,27 @@ public class BookingCreateRequest {
 		this.resourceId = resourceId;
 	}
 
-	public LocalDateTime getStartTime() {
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+
+	public LocalTime getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(LocalDateTime startTime) {
+	public void setStartTime(LocalTime startTime) {
 		this.startTime = startTime;
 	}
 
-	public LocalDateTime getEndTime() {
+	public LocalTime getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(LocalDateTime endTime) {
+	public void setEndTime(LocalTime endTime) {
 		this.endTime = endTime;
 	}
 
@@ -63,12 +66,12 @@ public class BookingCreateRequest {
 		this.purpose = purpose;
 	}
 
-	public Integer getExpectedAttendees() {
-		return expectedAttendees;
+	public Integer getAttendees() {
+		return attendees;
 	}
 
-	public void setExpectedAttendees(Integer expectedAttendees) {
-		this.expectedAttendees = expectedAttendees;
+	public void setAttendees(Integer attendees) {
+		this.attendees = attendees;
 	}
 }
 

@@ -9,14 +9,57 @@ async function parseJsonResponse(response) {
 	return data;
 }
 
-export async function getResources(query) {
-	const url = query ? `${RESOURCES_URL}?query=${encodeURIComponent(query)}` : RESOURCES_URL;
-	const response = await fetch(url);
+function buildQuery(params) {
+	const qs = new URLSearchParams();
+	Object.entries(params || {}).forEach(([key, value]) => {
+		if (value === undefined || value === null || value === "") return;
+		qs.set(key, String(value));
+	});
+	const str = qs.toString();
+	return str ? `?${str}` : "";
+}
+
+export async function listResources(filters) {
+	const response = await fetch(`${RESOURCES_URL}${buildQuery(filters)}`, {
+		credentials: "include"
+	});
 	return parseJsonResponse(response);
 }
 
-export async function getAvailableResources() {
-	const response = await fetch(`${RESOURCES_URL}/available`);
+export async function getResourceById(id) {
+	const response = await fetch(`${RESOURCES_URL}/${id}`, { credentials: "include" });
 	return parseJsonResponse(response);
+}
+
+export async function createResource(payload) {
+	const response = await fetch(RESOURCES_URL, {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload)
+	});
+	return parseJsonResponse(response);
+}
+
+export async function updateResource(id, payload) {
+	const response = await fetch(`${RESOURCES_URL}/${id}`, {
+		method: "PUT",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload)
+	});
+	return parseJsonResponse(response);
+}
+
+export async function deleteResource(id) {
+	const response = await fetch(`${RESOURCES_URL}/${id}`, {
+		method: "DELETE",
+		credentials: "include"
+	});
+	if (!response.ok) {
+		const data = await response.json().catch(() => ({}));
+		throw new Error(data.message || data.error || "Request failed");
+	}
+	return true;
 }
 

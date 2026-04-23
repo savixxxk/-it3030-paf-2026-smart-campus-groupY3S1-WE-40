@@ -15,11 +15,7 @@ export function AuthProvider({ children }) {
 	const login = async (payload) => {
 		let data;
 
-		if (payload.email?.toLowerCase() === ADMIN_EMAIL && payload.password === ADMIN_PASSWORD) {
-			data = { fullName: ADMIN_NAME, email: ADMIN_EMAIL, role: "ADMIN" };
-		} else {
-			data = await loginUser(payload);
-		}
+		data = await loginUser(payload);
 
 		setUser(data);
 		localStorage.setItem("smart-campus-user", JSON.stringify(data));

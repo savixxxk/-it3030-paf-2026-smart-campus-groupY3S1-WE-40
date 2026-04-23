@@ -1,67 +1,71 @@
 package com.campus.smart.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.campus.smart.dto.BookingAdminDecisionRequest;
 import com.campus.smart.dto.BookingCreateRequest;
-import com.campus.smart.dto.BookingDecisionRequest;
-import com.campus.smart.dto.BookingView;
+import com.campus.smart.dto.BookingResponse;
+import com.campus.smart.dto.NotificationCreateRequest;
 import com.campus.smart.enums.BookingStatus;
+import com.campus.smart.enums.NotificationCategory;
+import com.campus.smart.enums.ResourceStatus;
+import com.campus.smart.exception.BookingConflictException;
+import com.campus.smart.exception.BookingNotFoundException;
+import com.campus.smart.exception.ForbiddenOperationException;
+import com.campus.smart.exception.ResourceNotFoundException;
 import com.campus.smart.model.Booking;
 import com.campus.smart.model.Resource;
-import com.campus.smart.model.Role;
 import com.campus.smart.model.User;
 import com.campus.smart.repository.BookingRepository;
 import com.campus.smart.repository.ResourceRepository;
 import com.campus.smart.repository.UserRepository;
 import com.campus.smart.service.BookingService;
 import com.campus.smart.service.NotificationService;
-import com.campus.smart.dto.NotificationCreateRequest;
-import com.campus.smart.enums.NotificationCategory;
 
 @Service
 public class BookingServiceImpl implements BookingService {
-
 	private final BookingRepository bookingRepository;
-	private final UserRepository userRepository;
 	private final ResourceRepository resourceRepository;
+	private final UserRepository userRepository;
 	private final NotificationService notificationService;
 
 	public BookingServiceImpl(
 			BookingRepository bookingRepository,
-			UserRepository userRepository,
 			ResourceRepository resourceRepository,
-			NotificationService notificationService
-	) {
+			UserRepository userRepository,
+			NotificationService notificationService) {
 		this.bookingRepository = bookingRepository;
-		this.userRepository = userRepository;
 		this.resourceRepository = resourceRepository;
+		this.userRepository = userRepository;
 		this.notificationService = notificationService;
 	}
 
 	@Override
 	@Transactional
-	public BookingView createBookingRequest(BookingCreateRequest request) {
-		LocalDateTime start = request.getStartTime();
-		LocalDateTime end = request.getEndTime();
-		validateTimeRange(start, end);
-
-		User user = userRepository.findByEmail(request.getUserEmail())
-				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+	public BookingResponse createBooking(String userEmail, BookingCreateRequest request) {
+		User user = userRepository.findByEmail(userEmail)
+				.orElseThrow(() -> new IllegalArgumentException("User not found for email: " + userEmail));
 
 		Resource resource = resourceRepository.findById(request.getResourceId())
-				.orElseThrow(() -> new IllegalArgumentException("Resource not found"));
+				.orElseThrow(() -> new ResourceNotFoundException(request.getResourceId()));
 
-		if (Boolean.FALSE.equals(resource.getAvailable())) {
-			throw new IllegalArgumentException("Resource is not available");
-		}
+		validateResource(resource);
+		validateTimeRange(request.getStartTime(), request.getEndTime());
+		validateWithinAvailability(resource, request.getStartTime(), request.getEndTime());
+		validateAttendees(resource, request.getAttendees());
+
+		LocalDateTime start = LocalDateTime.of(request.getDate(), request.getStartTime());
+		LocalDateTime end = LocalDateTime.of(request.getDate(), request.getEndTime());
 
 		if (bookingRepository.existsApprovedOverlap(resource.getId(), start, end)) {
-			throw new IllegalArgumentException("Booking conflict: resource already booked for this time range");
+			throw new BookingConflictException("Requested slot conflicts with an approved booking");
 		}
 
 		Booking booking = new Booking();
@@ -69,163 +73,179 @@ public class BookingServiceImpl implements BookingService {
 		booking.setResource(resource);
 		booking.setStartTime(start);
 		booking.setEndTime(end);
-		booking.setPurpose(trimToNull(request.getPurpose()));
-		booking.setExpectedAttendees(request.getExpectedAttendees());
+		booking.setPurpose(request.getPurpose());
+		booking.setExpectedAttendees(request.getAttendees());
 		booking.setStatus(BookingStatus.PENDING);
 
-		return toView(bookingRepository.save(booking));
+		Booking saved = bookingRepository.save(booking);
+		return toResponse(saved);
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public List<BookingView> getMyBookings(String email) {
-		return bookingRepository.findAllForUser(email).stream()
-				.map(this::toView)
+	public List<BookingResponse> getMyBookings(String userEmail) {
+		return bookingRepository.findByUserEmail(userEmail).stream()
+				.sorted(Comparator.comparing(Booking::getCreatedAt).reversed())
+				.map(this::toResponse)
 				.toList();
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public List<BookingView> getAllBookings(BookingStatus status, Long resourceId, LocalDateTime from, LocalDateTime to) {
-		return bookingRepository.findAllWithUserAndResource().stream()
-				.filter(booking -> status == null || booking.getStatus() == status)
-				.filter(booking -> resourceId == null || Objects.equals(booking.getResource().getId(), resourceId))
-				.filter(booking -> from == null || !booking.getStartTime().isBefore(from))
-				.filter(booking -> to == null || !booking.getEndTime().isAfter(to))
-				.map(this::toView)
+	public List<BookingResponse> getAllBookings(BookingStatus status, Long resourceId) {
+		List<Booking> bookings;
+		if (status != null && resourceId != null) {
+			bookings = bookingRepository.findByResourceIdAndStatus(resourceId, status);
+		} else if (status != null) {
+			bookings = bookingRepository.findByStatus(status);
+		} else if (resourceId != null) {
+			bookings = bookingRepository.findByResourceId(resourceId);
+		} else {
+			bookings = bookingRepository.findAll();
+		}
+
+		return bookings.stream()
+				.sorted(Comparator.comparing(Booking::getCreatedAt).reversed())
+				.map(this::toResponse)
 				.toList();
 	}
 
 	@Override
 	@Transactional
-	public BookingView approveBooking(Long bookingId, BookingDecisionRequest request) {
-		requireAdmin(request.getAdminEmail());
-
-		Booking booking = bookingRepository.findById(bookingId)
-				.orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-
+	public BookingResponse approve(Long bookingId) {
+		Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
 		if (booking.getStatus() != BookingStatus.PENDING) {
 			throw new IllegalArgumentException("Only PENDING bookings can be approved");
 		}
 
-		// Re-check conflicts on approval
-		if (bookingRepository.existsApprovedOverlap(
-				booking.getResource().getId(),
-				booking.getStartTime(),
-				booking.getEndTime()
-		)) {
-			throw new IllegalArgumentException("Cannot approve: booking conflicts with an approved booking");
+		Resource resource = booking.getResource();
+		validateResource(resource);
+
+		LocalDateTime start = booking.getStartTime();
+		LocalDateTime end = booking.getEndTime();
+		validateTimeRange(start.toLocalTime(), end.toLocalTime());
+		validateWithinAvailability(resource, start.toLocalTime(), end.toLocalTime());
+		validateAttendees(resource, booking.getExpectedAttendees());
+
+		if (bookingRepository.existsApprovedOverlap(resource.getId(), start, end)) {
+			throw new BookingConflictException("Cannot approve: slot conflicts with another approved booking");
 		}
 
 		booking.setStatus(BookingStatus.APPROVED);
-		booking.setAdminReason(trimToNull(request.getReason()));
+		booking.setAdminResponseReason(null);
 		Booking saved = bookingRepository.save(booking);
-		notifyBookingUpdate(saved, "Booking Approved", "Your booking request has been approved.");
-		return toView(saved);
+
+		notifyUser(saved.getUser().getEmail(), "Booking approved",
+				"Your booking for " + saved.getResource().getName() + " was approved.",
+				NotificationCategory.EVENTS_ACTIVITIES);
+
+		return toResponse(saved);
 	}
 
 	@Override
 	@Transactional
-	public BookingView rejectBooking(Long bookingId, BookingDecisionRequest request) {
-		requireAdmin(request.getAdminEmail());
-
-		Booking booking = bookingRepository.findById(bookingId)
-				.orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-
+	public BookingResponse reject(Long bookingId, BookingAdminDecisionRequest request) {
+		Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
 		if (booking.getStatus() != BookingStatus.PENDING) {
 			throw new IllegalArgumentException("Only PENDING bookings can be rejected");
 		}
 
-		String reason = trimToNull(request.getReason());
-		if (reason == null) {
-			throw new IllegalArgumentException("Rejection reason is required");
-		}
-
 		booking.setStatus(BookingStatus.REJECTED);
-		booking.setAdminReason(reason);
+		booking.setAdminResponseReason(request.getReason());
 		Booking saved = bookingRepository.save(booking);
-		notifyBookingUpdate(saved, "Booking Rejected", "Your booking request was rejected. Reason: " + reason);
-		return toView(saved);
+
+		notifyUser(saved.getUser().getEmail(), "Booking rejected",
+				"Your booking for " + saved.getResource().getName() + " was rejected. Reason: " + request.getReason(),
+				NotificationCategory.EVENTS_ACTIVITIES);
+
+		return toResponse(saved);
 	}
 
 	@Override
 	@Transactional
-	public BookingView cancelBooking(Long bookingId, String email) {
-		Booking booking = bookingRepository.findById(bookingId)
-				.orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+	public BookingResponse cancel(Long bookingId, String userEmail) {
+		Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-		if (booking.getUser() == null || booking.getUser().getEmail() == null || !booking.getUser().getEmail().equalsIgnoreCase(email)) {
-			throw new IllegalArgumentException("You can only cancel your own bookings");
+		String ownerEmail = booking.getUser() != null ? booking.getUser().getEmail() : null;
+		if (ownerEmail == null || !ownerEmail.equalsIgnoreCase(userEmail)) {
+			throw new ForbiddenOperationException("You can only cancel your own bookings");
 		}
 
-		if (booking.getStatus() != BookingStatus.APPROVED) {
-			throw new IllegalArgumentException("Only APPROVED bookings can be cancelled");
+		if (booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.APPROVED) {
+			throw new IllegalArgumentException("Only PENDING or APPROVED bookings can be cancelled");
 		}
 
 		booking.setStatus(BookingStatus.CANCELLED);
 		Booking saved = bookingRepository.save(booking);
-		notifyBookingUpdate(saved, "Booking Cancelled", "Your booking has been cancelled.");
-		return toView(saved);
+
+		notifyUser(saved.getUser().getEmail(), "Booking cancelled",
+				"Your booking for " + saved.getResource().getName() + " was cancelled.",
+				NotificationCategory.EVENTS_ACTIVITIES);
+
+		return toResponse(saved);
 	}
 
-	private void validateTimeRange(LocalDateTime start, LocalDateTime end) {
-		if (start == null || end == null) {
-			throw new IllegalArgumentException("Start time and end time are required");
-		}
-		if (!start.isBefore(end)) {
-			throw new IllegalArgumentException("Start time must be before end time");
-		}
-	}
-
-	private void requireAdmin(String email) {
-		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
-		if (user.getRole() != Role.ADMIN) {
-			throw new IllegalArgumentException("Only ADMIN users can perform this action");
+	private void validateTimeRange(LocalTime start, LocalTime end) {
+		if (start == null || end == null || !start.isBefore(end)) {
+			throw new IllegalArgumentException("startTime must be before endTime");
 		}
 	}
 
-	private BookingView toView(Booking booking) {
-		String userEmail = booking.getUser() != null ? booking.getUser().getEmail() : null;
-		String userName = booking.getUser() != null ? booking.getUser().getName() : null;
-		Long resourceId = booking.getResource() != null ? booking.getResource().getId() : null;
-		String resourceName = booking.getResource() != null ? booking.getResource().getName() : null;
-		String resourceLocation = booking.getResource() != null ? booking.getResource().getLocation() : null;
-
-		return new BookingView(
-				booking.getId(),
-				userEmail,
-				userName,
-				resourceId,
-				resourceName,
-				resourceLocation,
-				booking.getStartTime(),
-				booking.getEndTime(),
-				booking.getStatus(),
-				booking.getPurpose(),
-				booking.getExpectedAttendees(),
-				booking.getAdminReason(),
-				booking.getCreatedAt(),
-				booking.getUpdatedAt()
-		);
+	private void validateResource(Resource resource) {
+		if (resource.getStatus() != ResourceStatus.ACTIVE) {
+			throw new IllegalArgumentException("Resource is not ACTIVE");
+		}
 	}
 
-	private void notifyBookingUpdate(Booking booking, String title, String message) {
-		if (booking.getUser() == null || booking.getUser().getEmail() == null) {
-			return;
+	private void validateWithinAvailability(Resource resource, LocalTime start, LocalTime end) {
+		LocalTime windowStart = resource.getAvailabilityStart();
+		LocalTime windowEnd = resource.getAvailabilityEnd();
+		if (windowStart != null && start.isBefore(windowStart)) {
+			throw new IllegalArgumentException("Booking startTime is before resource availabilityStart");
 		}
+		if (windowEnd != null && end.isAfter(windowEnd)) {
+			throw new IllegalArgumentException("Booking endTime is after resource availabilityEnd");
+		}
+	}
+
+	private void validateAttendees(Resource resource, Integer attendees) {
+		if (attendees == null) return;
+		if (resource.getCapacity() != null && attendees > resource.getCapacity()) {
+			throw new IllegalArgumentException("attendees exceeds resource capacity");
+		}
+	}
+
+	private BookingResponse toResponse(Booking booking) {
+		BookingResponse response = new BookingResponse();
+		response.setId(booking.getId());
+		response.setUserEmail(booking.getUser() != null ? booking.getUser().getEmail() : null);
+		response.setResourceId(booking.getResource() != null ? booking.getResource().getId() : null);
+		response.setResourceName(booking.getResource() != null ? booking.getResource().getName() : null);
+		response.setPurpose(booking.getPurpose());
+		response.setAttendees(booking.getExpectedAttendees());
+		response.setStatus(booking.getStatus());
+		response.setAdminResponseReason(booking.getAdminResponseReason());
+
+		LocalDateTime start = booking.getStartTime();
+		LocalDateTime end = booking.getEndTime();
+		if (start != null) {
+			response.setDate(start.toLocalDate());
+			response.setStartTime(start.toLocalTime());
+		}
+		if (end != null) {
+			response.setEndTime(end.toLocalTime());
+		}
+
+		response.setCreatedAt(booking.getCreatedAt());
+		response.setUpdatedAt(booking.getUpdatedAt());
+		return response;
+	}
+
+	private void notifyUser(String email, String title, String message, NotificationCategory category) {
+		if (email == null || email.isBlank()) return;
 		NotificationCreateRequest request = new NotificationCreateRequest();
 		request.setTitle(title);
 		request.setMessage(message);
-		request.setCategory(NotificationCategory.BOOKING_UPDATES);
-		request.setTargetEmail(booking.getUser().getEmail());
+		request.setCategory(category);
 		notificationService.createNotification(request);
-	}
-
-	private String trimToNull(String value) {
-		if (value == null) return null;
-		String trimmed = value.trim();
-		return trimmed.isEmpty() ? null : trimmed;
 	}
 }
 

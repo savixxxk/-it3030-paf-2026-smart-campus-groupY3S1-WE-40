@@ -2,20 +2,9 @@ package com.campus.smart.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class BookingDecisionRequest {
-
-	@NotBlank
-	private String adminEmail;
-
+public class TicketRejectRequest {
+	@NotBlank(message = "reason is required")
 	private String reason;
-
-	public String getAdminEmail() {
-		return adminEmail;
-	}
-
-	public void setAdminEmail(String adminEmail) {
-		this.adminEmail = adminEmail;
-	}
 
 	public String getReason() {
 		return reason;

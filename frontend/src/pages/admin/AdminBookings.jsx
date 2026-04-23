@@ -1,218 +1,171 @@
 import { useEffect, useMemo, useState } from "react";
 import { approveBooking, getAllBookings, rejectBooking } from "../../services/bookingService";
-import { getResources } from "../../services/resourceService";
-import { useAuth } from "../../context/AuthContext";
 
-const STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED", "CANCELLED"];
-
-const STATUS_STYLES = {
-	PENDING: "bg-amber-400/20 text-amber-200",
-	APPROVED: "bg-emerald-400/15 text-emerald-200",
-	REJECTED: "bg-rose-400/20 text-rose-200",
-	CANCELLED: "bg-slate-400/20 text-slate-200"
-};
+const STATUSES = ["", "PENDING", "APPROVED", "REJECTED", "CANCELLED", "COMPLETED"];
 
 export default function AdminBookings() {
-	const { user } = useAuth();
-	const adminEmail = user?.email || "admin@gmail.com";
-
 	const [bookings, setBookings] = useState([]);
-	const [resources, setResources] = useState([]);
-	const [filters, setFilters] = useState({ status: "", resourceId: "" });
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
-	const [status, setStatus] = useState("");
-	const [decision, setDecision] = useState({ bookingId: null, action: null, reason: "" });
+	const [filters, setFilters] = useState({ status: "", resourceId: "" });
 
-	const filteredBookings = useMemo(() => bookings, [bookings]);
+	const activeFilters = useMemo(() => {
+		const out = {};
+		if (filters.status) out.status = filters.status;
+		if (filters.resourceId) out.resourceId = filters.resourceId;
+		return out;
+	}, [filters]);
 
-	const loadData = async () => {
+	const refresh = async () => {
 		setLoading(true);
 		setError("");
 		try {
-			const [resourceData, bookingData] = await Promise.all([
-				getResources(),
-				getAllBookings({
-					status: filters.status || undefined,
-					resourceId: filters.resourceId || undefined
-				})
-			]);
-			setResources(resourceData);
-			setBookings(bookingData);
-		} catch (loadError) {
-			setError(loadError.message || "Failed to load bookings");
+			const data = await getAllBookings(activeFilters);
+			setBookings(Array.isArray(data) ? data : []);
+		} catch (e) {
+			setError(e?.message || "Failed to load bookings");
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	useEffect(() => {
-		loadData();
-	}, [filters.status, filters.resourceId]);
+		refresh();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activeFilters.status, activeFilters.resourceId]);
 
-	const openDecision = (bookingId, action) => {
-		setStatus("");
-		setError("");
-		setDecision({ bookingId, action, reason: "" });
-	};
-
-	const closeDecision = () => setDecision({ bookingId: null, action: null, reason: "" });
-
-	const submitDecision = async () => {
-		if (!decision.bookingId || !decision.action) return;
-		setStatus("");
+	const approve = async (booking) => {
 		setError("");
 		try {
-			const payload = { adminEmail, reason: decision.reason };
-			if (decision.action === "approve") {
-				await approveBooking(decision.bookingId, payload);
-				setStatus("Booking approved.");
-			} else {
-				await rejectBooking(decision.bookingId, payload);
-				setStatus("Booking rejected.");
-			}
-			closeDecision();
-			await loadData();
-		} catch (decisionError) {
-			setError(decisionError.message || "Failed to update booking");
+			await approveBooking(booking.id);
+			await refresh();
+		} catch (e) {
+			setError(e?.message || "Approve failed");
+		}
+	};
+
+	const reject = async (booking) => {
+		const reason = window.prompt("Reject reason (required):");
+		if (!reason) return;
+		setError("");
+		try {
+			await rejectBooking(booking.id, reason);
+			await refresh();
+		} catch (e) {
+			setError(e?.message || "Reject failed");
 		}
 	};
 
 	return (
 		<section className="space-y-6">
 			<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-				<h2 className="text-2xl font-black text-white">Bookings</h2>
-				<p className="mt-2 text-sm text-slate-300">Review booking requests and approve or reject them.</p>
-
-				<div className="mt-6 grid gap-4 md:grid-cols-2">
-					<label className="space-y-2">
-						<span className="text-sm font-semibold text-slate-200">Status</span>
-						<select
-							value={filters.status}
-							onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
-							className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-300/50"
-						>
-							<option value="">All</option>
-							{STATUS_OPTIONS.map((option) => (
-								<option key={option} value={option}>
-									{option}
-								</option>
-							))}
-						</select>
-					</label>
-
-					<label className="space-y-2">
-						<span className="text-sm font-semibold text-slate-200">Resource</span>
-						<select
-							value={filters.resourceId}
-							onChange={(event) => setFilters((prev) => ({ ...prev, resourceId: event.target.value }))}
-							className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-300/50"
-						>
-							<option value="">All</option>
-							{resources.map((resource) => (
-								<option key={resource.id} value={resource.id}>
-									{resource.name} · {resource.location}
-								</option>
-							))}
-						</select>
-					</label>
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div>
+						<h2 className="text-2xl font-black text-white">Bookings</h2>
+						<p className="mt-2 text-sm text-slate-300">Manage resource bookings and approvals.</p>
+					</div>
+					<button
+						onClick={refresh}
+						className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
+					>
+						Refresh
+					</button>
 				</div>
 
-				{loading ? <p className="mt-6 text-sm text-slate-300">Loading bookings...</p> : null}
-				{error ? <p className="mt-6 text-sm font-semibold text-rose-300">{error}</p> : null}
-				{status ? <p className="mt-6 text-sm font-semibold text-emerald-300">{status}</p> : null}
+				{error ? <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">{error}</p> : null}
 
-				<div className="mt-6 space-y-3">
-					{!loading && filteredBookings.length === 0 ? (
-						<p className="text-sm text-slate-300">No bookings found.</p>
-					) : null}
+				<div className="mt-6 grid gap-3 md:grid-cols-2">
+					<select
+						value={filters.status}
+						onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value }))}
+						className="w-full rounded-xl border border-white/10 bg-slate-900/40 px-3 py-2 text-sm text-white"
+					>
+						{STATUSES.map((s) => (
+							<option key={s || "ALL"} value={s}>
+								{s ? s : "All statuses"}
+							</option>
+						))}
+					</select>
+					<input
+						placeholder="Filter by resourceId"
+						value={filters.resourceId}
+						onChange={(e) => setFilters((p) => ({ ...p, resourceId: e.target.value }))}
+						className="w-full rounded-xl border border-white/10 bg-slate-900/40 px-3 py-2 text-sm text-white placeholder:text-slate-500"
+					/>
+				</div>
 
-					{filteredBookings.map((booking) => (
-						<article key={booking.id} className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-							<div className="flex flex-wrap items-start justify-between gap-4">
-								<div className="flex-1">
-									<h3 className="text-base font-bold text-white">
-										{booking.resourceName} <span className="text-slate-400">· {booking.resourceLocation}</span>
-									</h3>
-									<p className="mt-1 text-sm text-slate-300">
-										{new Date(booking.startTime).toLocaleString()} → {new Date(booking.endTime).toLocaleString()}
-									</p>
-									<p className="mt-2 text-sm text-slate-200">
-										<span className="text-slate-400">Requested by:</span> {booking.userName || booking.userEmail}{" "}
-										<span className="text-slate-500">({booking.userEmail})</span>
-									</p>
-									{booking.purpose ? <p className="mt-2 text-sm text-slate-200">{booking.purpose}</p> : null}
-									{booking.expectedAttendees != null ? (
-										<p className="mt-1 text-sm text-slate-300">Expected attendees: {booking.expectedAttendees}</p>
-									) : null}
-									{booking.adminReason ? <p className="mt-2 text-sm text-slate-300">Reason/Note: {booking.adminReason}</p> : null}
-								</div>
-
-								<div className="flex flex-col items-end gap-3">
-									<span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${STATUS_STYLES[booking.status] || "bg-slate-400/15 text-slate-200"}`}>
-										{booking.status}
-									</span>
-
-									{booking.status === "PENDING" ? (
-										<div className="flex flex-wrap items-center justify-end gap-2">
-											<button
-												onClick={() => openDecision(booking.id, "approve")}
-												className="rounded-xl bg-emerald-400 px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300"
-											>
-												Approve
-											</button>
-											<button
-												onClick={() => openDecision(booking.id, "reject")}
-												className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-4 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-300/15"
-											>
-												Reject
-											</button>
-										</div>
-									) : null}
-								</div>
-							</div>
-						</article>
-					))}
+				<div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
+					<table className="w-full text-left text-sm text-slate-200">
+						<thead className="bg-slate-900/60 text-xs uppercase text-slate-400">
+							<tr>
+								<th className="px-4 py-3">Booking</th>
+								<th className="px-4 py-3">User</th>
+								<th className="px-4 py-3">Resource</th>
+								<th className="px-4 py-3">When</th>
+								<th className="px-4 py-3">Status</th>
+								<th className="px-4 py-3 text-right">Actions</th>
+							</tr>
+						</thead>
+						<tbody className="divide-y divide-white/5 bg-slate-950/20">
+							{loading ? (
+								<tr>
+									<td className="px-4 py-6 text-slate-400" colSpan={6}>
+										Loading...
+									</td>
+								</tr>
+							) : bookings.length === 0 ? (
+								<tr>
+									<td className="px-4 py-6 text-slate-400" colSpan={6}>
+										No bookings found.
+									</td>
+								</tr>
+							) : (
+								bookings.map((b) => (
+									<tr key={b.id} className="hover:bg-white/5">
+										<td className="px-4 py-3">
+											<div className="font-semibold text-white">#{b.id}</div>
+											<div className="text-xs text-slate-400">{b.purpose}</div>
+											{b.adminResponseReason ? <div className="text-xs text-slate-500">Reason: {b.adminResponseReason}</div> : null}
+										</td>
+										<td className="px-4 py-3">{b.userEmail}</td>
+										<td className="px-4 py-3">
+											<div className="font-semibold text-white">{b.resourceName}</div>
+											<div className="text-xs text-slate-400">ID: {b.resourceId}</div>
+										</td>
+										<td className="px-4 py-3">
+											<div>{b.date}</div>
+											<div className="text-xs text-slate-400">
+												{b.startTime} - {b.endTime}
+											</div>
+										</td>
+										<td className="px-4 py-3">{b.status}</td>
+										<td className="px-4 py-3 text-right">
+											{b.status === "PENDING" ? (
+												<div className="flex justify-end gap-2">
+													<button
+														onClick={() => approve(b)}
+														className="rounded-lg bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-500/20"
+													>
+														Approve
+													</button>
+													<button
+														onClick={() => reject(b)}
+														className="rounded-lg bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/20"
+													>
+														Reject
+													</button>
+												</div>
+											) : (
+												<span className="text-xs text-slate-500">—</span>
+											)}
+										</td>
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
 				</div>
 			</div>
-
-			{decision.bookingId ? (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4">
-					<div className="w-full max-w-lg rounded-3xl border border-white/10 bg-slate-950 p-6 shadow-2xl">
-						<h3 className="text-xl font-black text-white">
-							{decision.action === "approve" ? "Approve Booking" : "Reject Booking"}
-						</h3>
-						<p className="mt-2 text-sm text-slate-300">
-							{decision.action === "approve"
-								? "Optionally leave a note (it will be visible to the student)."
-								: "Provide a reason for rejection (required)."}
-						</p>
-
-						<textarea
-							rows={4}
-							value={decision.reason}
-							onChange={(event) => setDecision((prev) => ({ ...prev, reason: event.target.value }))}
-							className="mt-5 w-full resize-none rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-slate-100 outline-none focus:border-cyan-300/50"
-							placeholder={decision.action === "approve" ? "Optional note..." : "Reason for rejection..."}
-						/>
-
-						<div className="mt-6 flex items-center justify-end gap-3">
-							<button
-								onClick={closeDecision}
-								className="rounded-xl border border-white/10 bg-slate-900/50 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900/80"
-							>
-								Cancel
-							</button>
-							<button
-								onClick={submitDecision}
-								className="rounded-xl bg-cyan-400 px-5 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-							>
-								Confirm
-							</button>
-						</div>
-					</div>
-				</div>
-			) : null}
 		</section>
 	);
 }

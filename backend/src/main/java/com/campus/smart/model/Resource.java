@@ -2,6 +2,10 @@ package com.campus.smart.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import com.campus.smart.enums.ResourceStatus;
+import com.campus.smart.enums.ResourceType;
 
 @Entity
 @Table(name = "resources")
@@ -17,11 +21,25 @@ public class Resource {
     @Column(length = 500)
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ResourceType type = ResourceType.LECTURE_HALL;
+
     @Column(nullable = false)
     private String location;
 
     @Column(nullable = false)
     private Integer capacity = 0;
+
+    @Column(nullable = false)
+    private LocalTime availabilityStart = LocalTime.of(8, 0);
+
+    @Column(nullable = false)
+    private LocalTime availabilityEnd = LocalTime.of(18, 0);
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ResourceStatus status = ResourceStatus.ACTIVE;
 
     @Column(nullable = false)
     private Boolean available = true;
@@ -58,6 +76,14 @@ public class Resource {
         this.description = description;
     }
 
+    public ResourceType getType() {
+        return type;
+    }
+
+    public void setType(ResourceType type) {
+        this.type = type;
+    }
+
     public String getLocation() {
         return location;
     }
@@ -72,6 +98,30 @@ public class Resource {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+
+    public LocalTime getAvailabilityStart() {
+        return availabilityStart;
+    }
+
+    public void setAvailabilityStart(LocalTime availabilityStart) {
+        this.availabilityStart = availabilityStart;
+    }
+
+    public LocalTime getAvailabilityEnd() {
+        return availabilityEnd;
+    }
+
+    public void setAvailabilityEnd(LocalTime availabilityEnd) {
+        this.availabilityEnd = availabilityEnd;
+    }
+
+    public ResourceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ResourceStatus status) {
+        this.status = status;
     }
 
     public Boolean getAvailable() {

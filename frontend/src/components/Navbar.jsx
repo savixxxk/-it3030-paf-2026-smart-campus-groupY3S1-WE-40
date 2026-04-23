@@ -23,8 +23,11 @@ export default function Navbar() {
 								</Link>
 							) : (
 								<>
-									<Link to="/bookings" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-										Bookings
+									<Link to="/my-bookings" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+										My Bookings
+									</Link>
+									<Link to="/my-tickets" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+										My Tickets
 									</Link>
 									<Link to="/notifications" className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
 										Notifications

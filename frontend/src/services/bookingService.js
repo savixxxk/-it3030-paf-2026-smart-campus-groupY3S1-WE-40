@@ -9,54 +9,58 @@ async function parseJsonResponse(response) {
 	return data;
 }
 
+function buildQuery(params) {
+	const qs = new URLSearchParams();
+	Object.entries(params || {}).forEach(([key, value]) => {
+		if (value === undefined || value === null || value === "") return;
+		qs.set(key, String(value));
+	});
+	const str = qs.toString();
+	return str ? `?${str}` : "";
+}
+
 export async function createBooking(payload) {
 	const response = await fetch(BOOKINGS_URL, {
 		method: "POST",
+		credentials: "include",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload)
 	});
 	return parseJsonResponse(response);
 }
 
-export async function getMyBookings(email) {
-	const response = await fetch(`${BOOKINGS_URL}/my?email=${encodeURIComponent(email)}`);
+export async function getMyBookings() {
+	const response = await fetch(`${BOOKINGS_URL}/my`, { credentials: "include" });
 	return parseJsonResponse(response);
 }
 
-export async function cancelBooking(bookingId, email) {
-	const response = await fetch(`${BOOKINGS_URL}/${bookingId}/cancel?email=${encodeURIComponent(email)}`, {
-		method: "PUT"
-	});
+export async function getAllBookings(filters) {
+	const response = await fetch(`${BOOKINGS_URL}${buildQuery(filters)}`, { credentials: "include" });
 	return parseJsonResponse(response);
 }
 
-export async function getAllBookings(filters = {}) {
-	const params = new URLSearchParams();
-	if (filters.status) params.set("status", filters.status);
-	if (filters.resourceId) params.set("resourceId", String(filters.resourceId));
-	if (filters.from) params.set("from", filters.from);
-	if (filters.to) params.set("to", filters.to);
-
-	const query = params.toString();
-	const url = query ? `${BOOKINGS_URL}?${query}` : BOOKINGS_URL;
-	const response = await fetch(url);
-	return parseJsonResponse(response);
-}
-
-export async function approveBooking(bookingId, payload) {
-	const response = await fetch(`${BOOKINGS_URL}/${bookingId}/approve`, {
+export async function approveBooking(id) {
+	const response = await fetch(`${BOOKINGS_URL}/${id}/approve`, {
 		method: "PUT",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(payload)
+		credentials: "include"
 	});
 	return parseJsonResponse(response);
 }
 
-export async function rejectBooking(bookingId, payload) {
-	const response = await fetch(`${BOOKINGS_URL}/${bookingId}/reject`, {
+export async function rejectBooking(id, reason) {
+	const response = await fetch(`${BOOKINGS_URL}/${id}/reject`, {
 		method: "PUT",
+		credentials: "include",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(payload)
+		body: JSON.stringify({ reason })
+	});
+	return parseJsonResponse(response);
+}
+
+export async function cancelBooking(id) {
+	const response = await fetch(`${BOOKINGS_URL}/${id}/cancel`, {
+		method: "PUT",
+		credentials: "include"
 	});
 	return parseJsonResponse(response);
 }

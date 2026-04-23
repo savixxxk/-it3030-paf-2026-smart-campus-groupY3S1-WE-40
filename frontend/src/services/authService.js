@@ -12,6 +12,7 @@ async function parseJsonResponse(response) {
 export async function registerUser(payload) {
 	const response = await fetch(`${BASE_URL}/register`, {
 		method: "POST",
+		credentials: "include",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload)
 	});
@@ -21,6 +22,7 @@ export async function registerUser(payload) {
 export async function loginUser(payload) {
 	const response = await fetch(`${BASE_URL}/login`, {
 		method: "POST",
+		credentials: "include",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload)
 	});

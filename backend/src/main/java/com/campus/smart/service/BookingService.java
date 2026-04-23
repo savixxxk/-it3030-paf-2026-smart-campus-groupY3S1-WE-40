@@ -1,24 +1,23 @@
 package com.campus.smart.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
+import com.campus.smart.dto.BookingAdminDecisionRequest;
 import com.campus.smart.dto.BookingCreateRequest;
-import com.campus.smart.dto.BookingDecisionRequest;
-import com.campus.smart.dto.BookingView;
+import com.campus.smart.dto.BookingResponse;
 import com.campus.smart.enums.BookingStatus;
 
 public interface BookingService {
-	BookingView createBookingRequest(BookingCreateRequest request);
+	BookingResponse createBooking(String userEmail, BookingCreateRequest request);
 
-	List<BookingView> getMyBookings(String email);
+	List<BookingResponse> getMyBookings(String userEmail);
 
-	List<BookingView> getAllBookings(BookingStatus status, Long resourceId, LocalDateTime from, LocalDateTime to);
+	List<BookingResponse> getAllBookings(BookingStatus status, Long resourceId);
 
-	BookingView approveBooking(Long bookingId, BookingDecisionRequest request);
+	BookingResponse approve(Long bookingId);
 
-	BookingView rejectBooking(Long bookingId, BookingDecisionRequest request);
+	BookingResponse reject(Long bookingId, BookingAdminDecisionRequest request);
 
-	BookingView cancelBooking(Long bookingId, String email);
+	BookingResponse cancel(Long bookingId, String userEmail);
 }
 

@@ -6,15 +6,13 @@ import { useNavigate } from "react-router-dom";
 const CATEGORIES = {
 	ACADEMIC_NOTICES: "Academic Notices",
 	EVENTS_ACTIVITIES: "Events & Activities",
-	MAINTENANCE_ALERTS: "Maintenance Alerts",
-	BOOKING_UPDATES: "Booking Updates"
+	MAINTENANCE_ALERTS: "Maintenance Alerts"
 };
 
 const CATEGORY_COLORS = {
 	ACADEMIC_NOTICES: "bg-blue-400/15 text-blue-200",
 	EVENTS_ACTIVITIES: "bg-emerald-400/15 text-emerald-200",
-	MAINTENANCE_ALERTS: "bg-orange-400/15 text-orange-200",
-	BOOKING_UPDATES: "bg-purple-400/15 text-purple-200"
+	MAINTENANCE_ALERTS: "bg-orange-400/15 text-orange-200"
 };
 
 export default function StudentNotifications() {
