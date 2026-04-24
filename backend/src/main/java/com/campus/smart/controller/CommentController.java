@@ -9,7 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+<<<<<<< HEAD
 //import org.springframework.web.bind.annotation.RequestMapping;
+=======
+import org.springframework.web.bind.annotation.RequestMapping;
+>>>>>>> 9a15d9d30cc76ce1ec4fdad9b9da2618f67001cd
 import org.springframework.web.bind.annotation.RestController;
 
 import com.campus.smart.dto.CommentCreateRequest;
