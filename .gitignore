@@ -1,0 +1,22 @@
+# Spring Boot
+target/
+*.log
+*.class
+*.jar
+*.war
+
+# IDE
+.vscode/
+*.iml
+
+# Node
+node_modules/
+dist/
+build/
+
+# Env
+.env
+
+#application properties
+src/main/resources/application.properties
+src/main/resources/application.yml
