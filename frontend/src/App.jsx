@@ -17,6 +17,12 @@ import AdminTickets from "./pages/admin/AdminTickets";
 import StudentNotifications from "./pages/StudentNotifications";
 import NotificationPreferences from "./pages/NotificationPreferences";
 import PrivateRoute from "./routes/PrivateRoute";
+<<<<<<< HEAD
+=======
+import MyBookings from "./pages/MyBookings";
+import MyTickets from "./pages/MyTickets";
+import TicketDetails from "./pages/TicketDetails";
+>>>>>>> c999ac3f4b32fc48012bbf52caf77df97bc7c6cb
 
 export default function App() {
 	return (
@@ -45,6 +51,33 @@ export default function App() {
 						}
 					/>
 					<Route
+<<<<<<< HEAD
+=======
+						path="/my-bookings"
+						element={
+							<PrivateRoute>
+								<MyBookings />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path="/my-tickets"
+						element={
+							<PrivateRoute>
+								<MyTickets />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path="/tickets/:id"
+						element={
+							<PrivateRoute>
+								<TicketDetails />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+>>>>>>> c999ac3f4b32fc48012bbf52caf77df97bc7c6cb
 						path="/admin-dashboard"
 						element={
 							<PrivateRoute requiredRole="ADMIN">

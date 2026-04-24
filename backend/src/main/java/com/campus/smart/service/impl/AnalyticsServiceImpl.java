@@ -4,6 +4,10 @@ import com.campus.smart.dto.AnalyticsDto;
 import com.campus.smart.dto.HourlyBookingDto;
 import com.campus.smart.dto.ResourceBookingCountDto;
 import com.campus.smart.enums.BookingStatus;
+<<<<<<< HEAD
+=======
+import com.campus.smart.enums.ResourceStatus;
+>>>>>>> c999ac3f4b32fc48012bbf52caf77df97bc7c6cb
 import com.campus.smart.model.Booking;
 import com.campus.smart.model.Resource;
 import com.campus.smart.repository.BookingRepository;
@@ -153,8 +157,13 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         long totalResources = resourceRepository.count();
         if (totalResources == 0) return 0;
 
+<<<<<<< HEAD
         List<Resource> availableResources = resourceRepository.findByAvailableTrue();
         return (double) availableResources.size() / totalResources * 100;
+=======
+        List<Resource> activeResources = resourceRepository.findByStatus(ResourceStatus.ACTIVE);
+        return (double) activeResources.size() / totalResources * 100;
+>>>>>>> c999ac3f4b32fc48012bbf52caf77df97bc7c6cb
     }
 
     private double calculateUtilization(List<Booking> bookings) {
