@@ -28,7 +28,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	private final UserRepository userRepository;
 	private final LoginAuditService loginAuditService;
 
-	@Value("${app.oauth2.frontend-success-url:http://localhost:5173/login}")
+	@Value("${app.oauth2.frontend-success-url:http://localhost:5173/}")
 	private String frontendSuccessUrl;
 
 	public OAuth2SuccessHandler(UserRepository userRepository, LoginAuditService loginAuditService) {
