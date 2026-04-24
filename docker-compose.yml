@@ -1,2 +1,68 @@
 version: '3.9'
-services: {}
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: smart_campus_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: smart_campus
+      MYSQL_USER: campus_user
+      MYSQL_PASSWORD: campus_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - smart_campus_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart_campus_backend
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/smart_campus?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: campus_user
+      SPRING_DATASOURCE_PASSWORD: campus_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    networks:
+      - smart_campus_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      timeout: 5s
+      retries: 10
+      interval: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smart_campus_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - smart_campus_net
+
+volumes:
+  mysql_data:
+
+networks:
+  smart_campus_net:
+    driver: bridge
