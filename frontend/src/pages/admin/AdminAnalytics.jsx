@@ -86,6 +86,10 @@ export default function AdminAnalytics() {
 					<p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total Resources</p>
 					<p className="mt-2 text-3xl font-black text-purple-200">{analytics?.totalResources || 0}</p>
 				</div>
+				<div className="rounded-2xl border border-white/10 bg-gradient-to-br from-rose-500/10 to-transparent p-6 backdrop-blur">
+					<p className="text-sm uppercase tracking-[0.2em] text-slate-400">Open Tickets</p>
+					<p className="mt-2 text-3xl font-black text-rose-200">{analytics?.openTickets || 0}</p>
+				</div>
 			</div>
 
 			{/* Top Resources Chart */}

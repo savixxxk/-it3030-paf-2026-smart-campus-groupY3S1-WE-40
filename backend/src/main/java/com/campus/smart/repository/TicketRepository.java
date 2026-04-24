@@ -5,9 +5,14 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import com.campus.smart.enums.TicketStatus;
 import com.campus.smart.model.Ticket;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecificationExecutor<Ticket> {
 	List<Ticket> findByCreatedByEmailOrderByCreatedAtDesc(String email);
+
+	long countByStatus(TicketStatus status);
+
+	List<Ticket> findByStatusAndCreatedAtLessThanEqual(TicketStatus status, java.time.LocalDateTime createdAt);
 }
 

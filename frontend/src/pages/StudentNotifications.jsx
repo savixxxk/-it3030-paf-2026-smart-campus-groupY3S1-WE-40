@@ -6,13 +6,21 @@ import { useNavigate } from "react-router-dom";
 const CATEGORIES = {
 	ACADEMIC_NOTICES: "Academic Notices",
 	EVENTS_ACTIVITIES: "Events & Activities",
-	MAINTENANCE_ALERTS: "Maintenance Alerts"
+	MAINTENANCE_ALERTS: "Maintenance Alerts",
+	REMINDERS: "Reminder Notifications"
 };
 
 const CATEGORY_COLORS = {
 	ACADEMIC_NOTICES: "bg-blue-400/15 text-blue-200",
 	EVENTS_ACTIVITIES: "bg-emerald-400/15 text-emerald-200",
-	MAINTENANCE_ALERTS: "bg-orange-400/15 text-orange-200"
+	MAINTENANCE_ALERTS: "bg-orange-400/15 text-orange-200",
+	REMINDERS: "bg-fuchsia-400/15 text-fuchsia-200"
+};
+
+const PRIORITY_COLORS = {
+	HIGH: "bg-rose-400/15 text-rose-200",
+	MEDIUM: "bg-amber-400/15 text-amber-200",
+	LOW: "bg-slate-400/15 text-slate-200"
 };
 
 export default function StudentNotifications() {
@@ -97,6 +105,9 @@ export default function StudentNotifications() {
 									<div className="mt-1 flex flex-wrap items-center gap-2">
 										<span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${CATEGORY_COLORS[item.category] || "bg-slate-400/15 text-slate-200"}`}>
 											{CATEGORIES[item.category] || item.category}
+										</span>
+										<span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${PRIORITY_COLORS[item.priority] || "bg-slate-400/15 text-slate-200"}`}>
+											{item.priority || "MEDIUM"}
 										</span>
 										<p className="text-sm text-slate-400">{new Date(item.createdAt).toLocaleString()}</p>
 									</div>

@@ -48,9 +48,6 @@ export default function Login() {
 						</p>
 						<h1 className="mt-4 text-3xl font-extrabold text-white">Login</h1>
 						<p className="mt-2 text-sm text-slate-300">Welcome back to Smart Campus.</p>
-						<p className="mt-2 rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">
-							Admin login: admin@gmail.com / Admin@1
-						</p>
 
 						<form onSubmit={onSubmit} className="mt-6 space-y-4">
 						<div>

@@ -33,6 +33,7 @@ C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\Tic
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\UserDTO.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\BookingStatus.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\NotificationCategory.java
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\NotificationPriority.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\ResourceStatus.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\ResourceType.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\TicketCategory.java
@@ -81,6 +82,7 @@ C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\AuthServiceImpl.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\BookingServiceImpl.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\LoginAuditServiceImpl.java
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\NotificationSchedulerService.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\NotificationServiceImpl.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\ResourceServiceImpl.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\service\impl\TicketAttachmentServiceImpl.java

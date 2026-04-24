@@ -1,7 +1,6 @@
 com\campus\smart\controller\AuthController.class
 com\campus\smart\security\OAuth2SuccessHandler.class
 com\campus\smart\repository\TicketAttachmentRepository.class
-application.properties
 com\campus\smart\exception\BookingNotFoundException.class
 com\campus\smart\exception\CommentNotFoundException.class
 com\campus\smart\service\BookingService.class
@@ -30,6 +29,7 @@ com\campus\smart\service\impl\ResourceServiceImpl.class
 com\campus\smart\dto\AnalyticsDto.class
 com\campus\smart\dto\ResourceCreateRequest.class
 com\campus\smart\service\impl\AuthServiceImpl.class
+com\campus\smart\enums\NotificationPriority.class
 com\campus\smart\service\AnalyticsService.class
 com\campus\smart\controller\AnalyticsController.class
 com\campus\smart\dto\ResourceResponse.class
@@ -50,6 +50,7 @@ com\campus\smart\dto\CommentUpdateRequest.class
 com\campus\smart\repository\TicketRepository.class
 com\campus\smart\service\TicketAttachmentService.class
 com\campus\smart\dto\TicketResolveRequest.class
+com\campus\smart\service\impl\NotificationSchedulerService.class
 com\campus\smart\controller\TicketAttachmentController.class
 com\campus\smart\model\LoginAudit.class
 com\campus\smart\dto\ResourceBookingCountDto.class

@@ -7,6 +7,7 @@ public class AnalyticsDto {
     private Long totalBookings;
     private Long approvedBookings;
     private Long pendingBookings;
+    private Long openTickets;
     private Long totalResources;
     private List<ResourceBookingCountDto> topResources;
     private List<HourlyBookingDto> peakHours;
@@ -34,6 +35,14 @@ public class AnalyticsDto {
 
     public void setPendingBookings(Long pendingBookings) {
         this.pendingBookings = pendingBookings;
+    }
+
+    public Long getOpenTickets() {
+        return openTickets;
+    }
+
+    public void setOpenTickets(Long openTickets) {
+        this.openTickets = openTickets;
     }
 
     public Long getTotalResources() {

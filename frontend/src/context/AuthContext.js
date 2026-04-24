@@ -2,9 +2,6 @@ import { createContext, createElement, useContext, useMemo, useState } from "rea
 import { loginUser, registerUser } from "../services/authService";
 
 const AuthContext = createContext(null);
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "Admin@1";
-const ADMIN_NAME = "admin";
 
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(() => {

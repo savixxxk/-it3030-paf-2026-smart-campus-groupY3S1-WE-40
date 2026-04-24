@@ -6,10 +6,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 
 import com.campus.smart.dto.NotificationCreateRequest;
 import com.campus.smart.dto.NotificationView;
 import com.campus.smart.enums.NotificationCategory;
+import com.campus.smart.enums.NotificationPriority;
 import com.campus.smart.model.Notification;
 import com.campus.smart.model.NotificationRead;
 import com.campus.smart.model.NotificationPreference;
@@ -43,10 +45,17 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public NotificationView createNotification(NotificationCreateRequest request) {
+		return createNotification(request, null);
+	}
+
+	@Override
+	public NotificationView createNotification(NotificationCreateRequest request, String sourceKey) {
 		Notification notification = new Notification();
 		notification.setTitle(request.getTitle().trim());
 		notification.setMessage(request.getMessage().trim());
 		notification.setCategory(request.getCategory());
+		notification.setPriority(request.getPriority() != null ? request.getPriority() : NotificationPriority.MEDIUM);
+		notification.setSourceKey(sourceKey);
 
 		Notification saved = notificationRepository.save(notification);
 		return toView(saved, false);
@@ -88,7 +97,7 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	@Override
-	public void markAsRead(Long notificationId, String email) {
+	public void markAsRead(@NonNull Long notificationId, String email) {
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -156,6 +165,7 @@ public class NotificationServiceImpl implements NotificationService {
 				notification.getTitle(),
 				notification.getMessage(),
 				notification.getCategory(),
+				notification.getPriority(),
 				notification.getCreatedAt(),
 				isRead
 		);

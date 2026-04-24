@@ -15,6 +15,10 @@ const CATEGORIES = {
 	MAINTENANCE_ALERTS: {
 		name: "Maintenance Alerts",
 		description: "Facility maintenance notifications and service updates"
+	},
+	REMINDERS: {
+		name: "Reminder Notifications",
+		description: "Booking reminders and follow-up alerts for unfinished tickets"
 	}
 };
 

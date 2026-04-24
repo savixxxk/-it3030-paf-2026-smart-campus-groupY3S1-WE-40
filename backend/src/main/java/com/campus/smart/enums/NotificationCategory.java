@@ -3,7 +3,8 @@ package com.campus.smart.enums;
 public enum NotificationCategory {
     ACADEMIC_NOTICES("Academic Notices"),
     EVENTS_ACTIVITIES("Events & Activities"),
-    MAINTENANCE_ALERTS("Maintenance Alerts");
+    MAINTENANCE_ALERTS("Maintenance Alerts"),
+    REMINDERS("Reminder Notifications");
 
     private final String displayName;
 

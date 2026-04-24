@@ -8,4 +8,6 @@ import com.campus.smart.model.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 	List<Notification> findAllByOrderByCreatedAtDesc();
+
+	boolean existsBySourceKey(String sourceKey);
 }

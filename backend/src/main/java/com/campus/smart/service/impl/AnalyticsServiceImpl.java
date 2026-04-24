@@ -4,16 +4,16 @@ import com.campus.smart.dto.AnalyticsDto;
 import com.campus.smart.dto.HourlyBookingDto;
 import com.campus.smart.dto.ResourceBookingCountDto;
 import com.campus.smart.enums.BookingStatus;
-import com.campus.smart.enums.ResourceStatus;
+import com.campus.smart.enums.TicketStatus;
 import com.campus.smart.model.Booking;
 import com.campus.smart.model.Resource;
 import com.campus.smart.repository.BookingRepository;
 import com.campus.smart.repository.ResourceRepository;
+import com.campus.smart.repository.TicketRepository;
 import com.campus.smart.service.AnalyticsService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,10 +22,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     private final BookingRepository bookingRepository;
     private final ResourceRepository resourceRepository;
+    private final TicketRepository ticketRepository;
 
-    public AnalyticsServiceImpl(BookingRepository bookingRepository, ResourceRepository resourceRepository) {
+    public AnalyticsServiceImpl(BookingRepository bookingRepository, ResourceRepository resourceRepository, TicketRepository ticketRepository) {
         this.bookingRepository = bookingRepository;
         this.resourceRepository = resourceRepository;
+        this.ticketRepository = ticketRepository;
     }
 
     @Override
@@ -36,11 +38,13 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         long totalBookings = bookingRepository.count();
         long approvedBookings = bookingRepository.findByStatus(BookingStatus.APPROVED).size();
         long pendingBookings = bookingRepository.findByStatus(BookingStatus.PENDING).size();
+        long openTickets = ticketRepository.countByStatus(TicketStatus.OPEN);
         long totalResources = resourceRepository.count();
 
         analytics.setTotalBookings(totalBookings);
         analytics.setApprovedBookings(approvedBookings);
         analytics.setPendingBookings(pendingBookings);
+        analytics.setOpenTickets(openTickets);
         analytics.setTotalResources(totalResources);
 
         // Top resources by bookings
@@ -97,7 +101,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private Map<String, Object> calculateUsageStats() {
         Map<String, Object> stats = new LinkedHashMap<>();
 
-        List<Booking> allBookings = bookingRepository.findAll();
         List<Booking> approvedBookings = bookingRepository.findByStatus(BookingStatus.APPROVED);
 
         // Month-wise stats for current month
@@ -148,14 +151,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse(0);
-    }
-
-    private double calculateUtilization() {
-        long totalResources = resourceRepository.count();
-        if (totalResources == 0) return 0;
-
-        List<Resource> activeResources = resourceRepository.findByStatus(ResourceStatus.ACTIVE);
-        return (double) activeResources.size() / totalResources * 100;
     }
 
     private double calculateUtilization(List<Booking> bookings) {

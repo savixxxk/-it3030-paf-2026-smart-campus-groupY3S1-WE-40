@@ -135,7 +135,7 @@ export default function AdminFacilities() {
 					</div>
 					<button
 						onClick={openCreate}
-						className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-slate-100"
+						className="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300"
 					>
 						Add resource
 					</button>
@@ -359,7 +359,7 @@ export default function AdminFacilities() {
 								<button
 									disabled={saving}
 									type="submit"
-									className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-slate-100 disabled:opacity-60"
+									className="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
 								>
 									{saving ? "Saving..." : "Save"}
 								</button>

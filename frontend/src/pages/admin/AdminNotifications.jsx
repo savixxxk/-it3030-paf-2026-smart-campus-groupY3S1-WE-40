@@ -4,13 +4,21 @@ import { createNotification, getAdminNotifications } from "../../services/notifi
 const CATEGORIES = {
 	ACADEMIC_NOTICES: "Academic Notices",
 	EVENTS_ACTIVITIES: "Events & Activities",
-	MAINTENANCE_ALERTS: "Maintenance Alerts"
+	MAINTENANCE_ALERTS: "Maintenance Alerts",
+	REMINDERS: "Reminder Notifications"
+};
+
+const PRIORITIES = {
+	HIGH: "High",
+	MEDIUM: "Medium",
+	LOW: "Low"
 };
 
 export default function AdminNotifications() {
 	const [title, setTitle] = useState("");
 	const [message, setMessage] = useState("");
 	const [category, setCategory] = useState("ACADEMIC_NOTICES");
+	const [priority, setPriority] = useState("MEDIUM");
 	const [notifications, setNotifications] = useState([]);
 	const [status, setStatus] = useState("");
 	const [error, setError] = useState("");
@@ -34,10 +42,11 @@ export default function AdminNotifications() {
 		setStatus("");
 
 		try {
-			await createNotification({ title, message, category });
+			await createNotification({ title, message, category, priority });
 			setTitle("");
 			setMessage("");
 			setCategory("ACADEMIC_NOTICES");
+			setPriority("MEDIUM");
 			setStatus("Notification posted successfully.");
 			await loadNotifications();
 		} catch (submitError) {
@@ -81,6 +90,21 @@ export default function AdminNotifications() {
 						</select>
 					</div>
 					<div>
+						<label className="mb-2 block text-sm font-semibold text-slate-200" htmlFor="notice-priority">
+							Priority
+						</label>
+						<select
+							id="notice-priority"
+							value={priority}
+							onChange={(event) => setPriority(event.target.value)}
+							className="w-full rounded-xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/50"
+						>
+							<option value="HIGH">High</option>
+							<option value="MEDIUM">Medium</option>
+							<option value="LOW">Low</option>
+						</select>
+					</div>
+					<div>
 						<label className="mb-2 block text-sm font-semibold text-slate-200" htmlFor="notice-message">
 							Message
 						</label>
@@ -118,9 +142,12 @@ export default function AdminNotifications() {
 									<h4 className="text-base font-bold text-cyan-200">{item.title}</h4>
 									<span className="text-xs text-slate-400">{new Date(item.createdAt).toLocaleString()}</span>
 								</div>
-								<div className="mt-2 flex items-center gap-2">
+								<div className="mt-2 flex flex-wrap items-center gap-2">
 									<span className="inline-block rounded-full bg-purple-400/20 px-2 py-1 text-xs font-semibold text-purple-200">
 										{CATEGORIES[item.category] || item.category}
+									</span>
+									<span className="inline-block rounded-full bg-slate-400/15 px-2 py-1 text-xs font-semibold text-slate-200">
+										{PRIORITIES[item.priority] || item.priority || "Medium"}
 									</span>
 								</div>
 								<p className="mt-2 text-sm text-slate-200">{item.message}</p>
