@@ -1,0 +1,21 @@
+### Java / Maven
+backend/target/
+*.class
+
+### Node / Vite
+frontend/node_modules/
+frontend/dist/
+
+### Runtime uploads / local data
+backend/uploads/
+
+### Environment files
+.env
+.env.*
+
+### OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
