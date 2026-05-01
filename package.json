@@ -1,0 +1,24 @@
+{
+  "name": "smart_campus",
+  "version": "1.0.0",
+  "description": "The Smart Campus Operations Hub is a full-stack web application developed as part of the IT3030 Programming Applications and Frameworks assignment for Semester 1, 2026. The system is designed to modernize and streamline university day-to-day operations through a single unified web platform.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/savixxxk/-it3030-paf-2026-smart-campus-groupY3S1-WE-40.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/savixxxk/-it3030-paf-2026-smart-campus-groupY3S1-WE-40/issues"
+  },
+  "homepage": "https://github.com/savixxxk/-it3030-paf-2026-smart-campus-groupY3S1-WE-40#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

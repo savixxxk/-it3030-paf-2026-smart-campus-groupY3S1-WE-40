@@ -1,5 +1,8 @@
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\config\DevDataSeeder.java
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\config\StartupChecks.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\controller\AnalyticsController.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\controller\AuthController.java
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\controller\AuthVerificationController.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\controller\BookingController.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\controller\CommentController.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\controller\NotificationController.java
@@ -31,6 +34,7 @@ C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\Tic
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\TicketResponse.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\TicketStatusUpdateRequest.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\UserDTO.java
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\dto\UserResponse.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\BookingStatus.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\NotificationCategory.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\enums\NotificationPriority.java

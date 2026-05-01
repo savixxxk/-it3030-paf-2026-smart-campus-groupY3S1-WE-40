@@ -4,6 +4,7 @@ import campusHero from "../assets/campus-real.jpg";
 import { useAuth } from "../context/AuthContext";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
+const ENABLE_GOOGLE_OAUTH = import.meta.env.VITE_ENABLE_GOOGLE_OAUTH === "true";
 
 export default function Login() {
 	const navigate = useNavigate();
@@ -22,8 +23,8 @@ export default function Login() {
 		setError("");
 		setLoading(true);
 		try {
-			await login(form);
-			navigate("/");
+			const user = await login(form);
+			navigate(user?.role === "ADMIN" ? "/admin-dashboard" : "/");
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -84,12 +85,18 @@ export default function Login() {
 							{loading ? "Logging in..." : "Login"}
 						</button>
 
-						<a
-							href={`${API_BASE}/oauth2/authorization/google`}
-							className="flex w-full items-center justify-center rounded-lg border border-slate-600 bg-slate-950/60 px-4 py-2 font-semibold text-white transition hover:border-cyan-300 hover:bg-slate-900"
-						>
-							Continue with Google
-						</a>
+						{ENABLE_GOOGLE_OAUTH ? (
+							<a
+								href={`${API_BASE}/oauth2/authorization/google`}
+								className="flex w-full items-center justify-center rounded-lg border border-slate-600 bg-slate-950/60 px-4 py-2 font-semibold text-white transition hover:border-cyan-300 hover:bg-slate-900"
+							>
+								Continue with Google
+							</a>
+						) : (
+							<p className="rounded-lg border border-slate-700 bg-slate-950/40 px-4 py-3 text-sm text-slate-300">
+								Google sign-in is disabled in local development. Set VITE_ENABLE_GOOGLE_OAUTH=true with real OAuth credentials to enable it.
+							</p>
+						)}
 						</form>
 
 						<p className="mt-6 text-sm text-slate-300">

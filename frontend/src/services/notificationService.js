@@ -11,13 +11,14 @@ async function parseJsonResponse(response) {
 }
 
 export async function getAdminNotifications() {
-	const response = await fetch(`${NOTIFICATIONS_URL}/admin`);
+	const response = await fetch(`${NOTIFICATIONS_URL}/admin`, { credentials: "include" });
 	return parseJsonResponse(response);
 }
 
 export async function createNotification(payload) {
 	const response = await fetch(`${NOTIFICATIONS_URL}/admin`, {
 		method: "POST",
+		credentials: "include",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload)
 	});
@@ -25,25 +26,31 @@ export async function createNotification(payload) {
 }
 
 export async function getStudentNotifications(email) {
-	const response = await fetch(`${NOTIFICATIONS_URL}/student?email=${encodeURIComponent(email)}`);
+	const response = await fetch(`${NOTIFICATIONS_URL}/student?email=${encodeURIComponent(email)}`, {
+		credentials: "include"
+	});
 	return parseJsonResponse(response);
 }
 
 export async function markNotificationRead(notificationId, email) {
 	const response = await fetch(`${NOTIFICATIONS_URL}/${notificationId}/read?email=${encodeURIComponent(email)}`, {
-		method: "POST"
+		method: "POST",
+		credentials: "include"
 	});
 	return parseJsonResponse(response);
 }
 
 export async function getNotificationPreferences(email) {
-	const response = await fetch(`${PREFERENCES_URL}/notifications?email=${encodeURIComponent(email)}`);
+	const response = await fetch(`${PREFERENCES_URL}/notifications?email=${encodeURIComponent(email)}`, {
+		credentials: "include"
+	});
 	return parseJsonResponse(response);
 }
 
 export async function updateNotificationPreference(email, category, enabled) {
 	const response = await fetch(`${PREFERENCES_URL}/notifications?email=${encodeURIComponent(email)}`, {
 		method: "PUT",
+		credentials: "include",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ category, enabled })
 	});

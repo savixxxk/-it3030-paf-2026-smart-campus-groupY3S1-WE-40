@@ -16,11 +16,13 @@ com\campus\smart\dto\BookingAdminDecisionRequest.class
 com\campus\smart\service\NotificationService.class
 com\campus\smart\controller\TicketController.class
 com\campus\smart\dto\PreferenceUpdateRequest.class
+com\campus\smart\config\StartupChecks.class
 com\campus\smart\exception\AttachmentLimitException.class
 com\campus\smart\model\NotificationRead.class
 com\campus\smart\exception\ForbiddenOperationException.class
 com\campus\smart\exception\TicketNotFoundException.class
 com\campus\smart\service\impl\AnalyticsServiceImpl.class
+com\campus\smart\controller\AuthVerificationController.class
 com\campus\smart\dto\HourlyBookingDto.class
 com\campus\smart\enums\NotificationCategory.class
 com\campus\smart\controller\UserController.class
@@ -49,6 +51,7 @@ com\campus\smart\controller\CommentController.class
 com\campus\smart\dto\CommentUpdateRequest.class
 com\campus\smart\repository\TicketRepository.class
 com\campus\smart\service\TicketAttachmentService.class
+com\campus\smart\dto\UserResponse.class
 com\campus\smart\dto\TicketResolveRequest.class
 com\campus\smart\service\impl\NotificationSchedulerService.class
 com\campus\smart\controller\TicketAttachmentController.class

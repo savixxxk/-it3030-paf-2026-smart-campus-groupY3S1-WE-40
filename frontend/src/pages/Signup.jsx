@@ -20,8 +20,8 @@ export default function Signup() {
 		setError("");
 		setLoading(true);
 		try {
-			await register(form);
-			navigate("/dashboard");
+			const user = await register(form);
+			navigate(user?.role === "ADMIN" ? "/admin-dashboard" : "/");
 		} catch (err) {
 			setError(err.message);
 		} finally {

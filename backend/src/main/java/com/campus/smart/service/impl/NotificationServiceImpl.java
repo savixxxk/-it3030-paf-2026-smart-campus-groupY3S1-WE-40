@@ -5,21 +5,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Service;
 import org.springframework.lang.NonNull;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
 
 import com.campus.smart.dto.NotificationCreateRequest;
 import com.campus.smart.dto.NotificationView;
 import com.campus.smart.enums.NotificationCategory;
 import com.campus.smart.enums.NotificationPriority;
 import com.campus.smart.model.Notification;
-import com.campus.smart.model.NotificationRead;
 import com.campus.smart.model.NotificationPreference;
+import com.campus.smart.model.NotificationRead;
 import com.campus.smart.model.Role;
 import com.campus.smart.model.User;
+import com.campus.smart.repository.NotificationPreferenceRepository;
 import com.campus.smart.repository.NotificationReadRepository;
 import com.campus.smart.repository.NotificationRepository;
-import com.campus.smart.repository.NotificationPreferenceRepository;
 import com.campus.smart.repository.UserRepository;
 import com.campus.smart.service.NotificationService;
 
@@ -30,17 +32,20 @@ public class NotificationServiceImpl implements NotificationService {
 	private final NotificationReadRepository notificationReadRepository;
 	private final NotificationPreferenceRepository notificationPreferenceRepository;
 	private final UserRepository userRepository;
+	private final JavaMailSender mailSender;
 
 	public NotificationServiceImpl(
 			NotificationRepository notificationRepository,
 			NotificationReadRepository notificationReadRepository,
 			NotificationPreferenceRepository notificationPreferenceRepository,
-			UserRepository userRepository
+			UserRepository userRepository,
+			JavaMailSender mailSender
 	) {
 		this.notificationRepository = notificationRepository;
 		this.notificationReadRepository = notificationReadRepository;
 		this.notificationPreferenceRepository = notificationPreferenceRepository;
 		this.userRepository = userRepository;
+		this.mailSender = mailSender;
 	}
 
 	@Override
@@ -58,6 +63,31 @@ public class NotificationServiceImpl implements NotificationService {
 		notification.setSourceKey(sourceKey);
 
 		Notification saved = notificationRepository.save(notification);
+
+		// Send email notifications to users who have the category enabled
+		try {
+			List<NotificationPreference> enabledPrefs = notificationPreferenceRepository.findByCategoryAndEnabledTrue(notification.getCategory());
+			Set<String> emails = enabledPrefs.stream().map(NotificationPreference::getUserEmail).collect(Collectors.toSet());
+
+			for (String email : emails) {
+				userRepository.findByEmail(email).ifPresent(user -> {
+					if (user.getEmail() != null && !user.getEmail().isBlank()) {
+						try {
+							SimpleMailMessage msg = new SimpleMailMessage();
+							msg.setTo(user.getEmail());
+							msg.setSubject("[Smart Campus] " + notification.getTitle());
+							msg.setText(notification.getMessage());
+							mailSender.send(msg);
+						} catch (Exception e) {
+							// Log and continue - do not fail notification creation
+						}
+					}
+				});
+			}
+		} catch (Exception e) {
+			// swallow so primary operation (saving notification) is not affected
+		}
+
 		return toView(saved, false);
 	}
 

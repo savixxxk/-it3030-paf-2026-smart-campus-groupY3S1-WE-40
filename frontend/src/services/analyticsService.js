@@ -10,6 +10,6 @@ async function parseJsonResponse(response) {
 }
 
 export async function getAnalyticsDashboard() {
-	const response = await fetch(`${ANALYTICS_URL}/dashboard`);
+	const response = await fetch(`${ANALYTICS_URL}/dashboard`, { credentials: "include" });
 	return parseJsonResponse(response);
 }
