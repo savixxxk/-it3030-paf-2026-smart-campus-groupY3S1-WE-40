@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 import com.campus.smart.dto.LoginRequest;
 import com.campus.smart.dto.UserDTO;
+import com.campus.smart.exception.InvalidLoginCredentialsException;
 import com.campus.smart.model.Role;
 import com.campus.smart.model.User;
 import com.campus.smart.repository.UserRepository;
 import com.campus.smart.service.AuthService;
 import com.campus.smart.service.LoginAuditService;
-import com.campus.smart.exception.InvalidLoginCredentialsException;
 
 @Service
 public class AuthServiceImpl implements AuthService {

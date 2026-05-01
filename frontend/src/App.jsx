@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import OAuth2Bridge from "./components/OAuth2Bridge";
 import Navbar from "./components/Navbar";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -24,10 +25,11 @@ import TicketDetails from "./pages/TicketDetails";
 export default function App() {
 	return (
 		<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-			<AuthProvider>
-				<OAuth2Bridge />
-				<Navbar />
-				<Routes>
+			<ThemeProvider>
+				<AuthProvider>
+					<OAuth2Bridge />
+					<Navbar />
+					<Routes>
 					<Route path="/" element={<Home />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/signup" element={<Signup />} />
@@ -87,9 +89,10 @@ export default function App() {
 						<Route path="facilities" element={<AdminFacilities />} />
 						<Route path="tickets" element={<AdminTickets />} />
 					</Route>
-				</Routes>
-				<Footer />
-			</AuthProvider>
+					</Routes>
+					<Footer />
+				</AuthProvider>
+			</ThemeProvider>
 		</BrowserRouter>
 	);
 }
