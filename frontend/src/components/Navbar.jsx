@@ -1,8 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
 	const { isAuthenticated, user, logout } = useAuth();
+	const navigate = useNavigate();
+	
+	const handleLogout = () => {
+		logout();
+		navigate("/");
+	};
 
 	return (
 		<header className="border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -36,7 +42,7 @@ export default function Navbar() {
 							)}
 							<span className="hidden text-sm text-slate-600 md:block">{user?.fullName}</span>
 							<button
-								onClick={logout}
+								onClick={handleLogout}
 								className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
 							>
 								Logout

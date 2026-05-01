@@ -53,6 +53,11 @@ public class SecurityConfig {
 			.oauth2Login(oauth2 -> oauth2
 					.userInfoEndpoint(userInfo -> userInfo.userAuthoritiesMapper(oauth2AuthoritiesMapper))
 					.successHandler(oauth2SuccessHandler))
+						.logout(logout -> logout
+								.logoutUrl("/api/auth/logout")
+								.invalidateHttpSession(true)
+								.clearAuthentication(true)
+								.permitAll())
 			.authorizeHttpRequests(auth -> auth
 					.requestMatchers("/", "/error", "/api/auth/**", "/oauth2/**", "/login/oauth2/**").permitAll()
 					.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

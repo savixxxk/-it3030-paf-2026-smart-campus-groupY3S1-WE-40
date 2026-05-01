@@ -2,6 +2,7 @@ import { createContext, createElement, useContext, useMemo, useState, useEffect,
 import { loginUser, registerUser } from "../services/authService";
 
 const AuthContext = createContext(null);
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(() => {
@@ -43,6 +44,14 @@ export function AuthProvider({ children }) {
 	const logout = useCallback(() => {
 		setUser(null);
 		localStorage.removeItem("smart-campus-user");
+
+		void fetch(`${API_BASE}/api/auth/logout`, {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" }
+		}).catch((err) => {
+			console.error("Logout error:", err);
+		});
 	}, []);
 
 	const value = useMemo(

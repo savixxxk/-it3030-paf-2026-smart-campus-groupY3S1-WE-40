@@ -11,6 +11,7 @@ import com.campus.smart.model.User;
 import com.campus.smart.repository.UserRepository;
 import com.campus.smart.service.AuthService;
 import com.campus.smart.service.LoginAuditService;
+import com.campus.smart.exception.InvalidLoginCredentialsException;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -67,18 +68,18 @@ public class AuthServiceImpl implements AuthService {
 
         if (adminEmail.equalsIgnoreCase(request.getEmail())) {
             loginAuditService.recordFailure(adminEmail, adminName, "PASSWORD", "INVALID_ADMIN_CREDENTIALS");
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidLoginCredentialsException("Invalid email or password");
         }
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     loginAuditService.recordFailure(request.getEmail(), null, "PASSWORD", "USER_NOT_FOUND");
-                    return new IllegalArgumentException("Invalid email or password");
+                    return new InvalidLoginCredentialsException("Invalid email or password");
                 });
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             loginAuditService.recordFailure(user.getEmail(), user.getName(), "PASSWORD", "BAD_PASSWORD");
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new InvalidLoginCredentialsException("Invalid email or password");
         }
 
         loginAuditService.recordSuccess(user.getEmail(), user.getName(), user.getRole(), "PASSWORD");

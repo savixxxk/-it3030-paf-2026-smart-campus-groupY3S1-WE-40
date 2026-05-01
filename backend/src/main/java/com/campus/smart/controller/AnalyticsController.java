@@ -1,12 +1,13 @@
 package com.campus.smart.controller;
 
-import com.campus.smart.dto.AnalyticsDto;
-import com.campus.smart.service.AnalyticsService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.campus.smart.dto.AnalyticsDto;
+import com.campus.smart.service.AnalyticsService;
 
 @RestController
 @RequestMapping("/api/analytics")

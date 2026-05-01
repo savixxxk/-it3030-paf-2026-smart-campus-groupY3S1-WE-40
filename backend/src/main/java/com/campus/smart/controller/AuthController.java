@@ -44,6 +44,17 @@ public class AuthController {
 		return ResponseEntity.ok(user);
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(HttpServletRequest request) {
+		// Invalidate the session
+		if (request.getSession(false) != null) {
+			request.getSession().invalidate();
+		}
+		// Clear security context
+		SecurityContextHolder.clearContext();
+		return ResponseEntity.ok().build();
+	}
+
 	private void startSession(UserDTO user, HttpServletRequest request) {
 		if (user == null || user.getEmail() == null || user.getRole() == null) {
 			return;

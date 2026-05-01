@@ -49,6 +49,7 @@ C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\excepti
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\CommentNotFoundException.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\ForbiddenOperationException.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\GlobalExceptionHandler.java
+C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\InvalidLoginCredentialsException.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\InvalidStatusTransitionException.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\ResourceNotFoundException.java
 C:\Users\MSI\Desktop\Smart_Campus\backend\src\main\java\com\campus\smart\exception\TicketNotFoundException.java
