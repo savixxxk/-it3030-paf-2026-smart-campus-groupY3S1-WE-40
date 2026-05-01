@@ -15,6 +15,7 @@ com\campus\smart\service\ResourceService.class
 com\campus\smart\dto\BookingAdminDecisionRequest.class
 com\campus\smart\service\NotificationService.class
 com\campus\smart\controller\TicketController.class
+com\campus\smart\config\DevDataSeeder.class
 com\campus\smart\dto\PreferenceUpdateRequest.class
 com\campus\smart\config\StartupChecks.class
 com\campus\smart\exception\AttachmentLimitException.class

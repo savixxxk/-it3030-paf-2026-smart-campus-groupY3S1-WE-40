@@ -31,12 +31,19 @@ export default function OAuth2Bridge() {
 
 		console.log("OAuth2Bridge: Processing successful auth", { email, name, role });
 		completeOAuthLogin({ fullName: name, email, role });
-		
+
+		// write a short ping so other windows/tabs receive a storage event
+		try {
+			localStorage.setItem("smart-campus-user-ping", String(Date.now()));
+		} catch (e) {
+			// ignore
+		}
+
 		// Wait a tick to ensure state is updated before navigation
 		setTimeout(() => {
 			navigate("/", { replace: true });
 		}, 0);
-	}, [completeOAuthLogin, location.search, navigate]);
+	}, [location.search]);
 
 	return null;
 }

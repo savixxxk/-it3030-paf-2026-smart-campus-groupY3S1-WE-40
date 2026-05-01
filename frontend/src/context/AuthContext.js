@@ -1,4 +1,4 @@
-import { createContext, createElement, useContext, useMemo, useState } from "react";
+import { createContext, createElement, useContext, useMemo, useState, useEffect, useCallback } from "react";
 import { loginUser, registerUser } from "../services/authService";
 
 const AuthContext = createContext(null);
@@ -9,33 +9,41 @@ export function AuthProvider({ children }) {
 		return saved ? JSON.parse(saved) : null;
 	});
 
-	const login = async (payload) => {
-		let data;
+	// Listen for auth changes in other tabs/popups (e.g., OAuth flow in a popup)
+	useEffect(() => {
+		const onStorage = (e) => {
+			if (e.key === "smart-campus-user") {
+				setUser(e.newValue ? JSON.parse(e.newValue) : null);
+			}
+		};
+		window.addEventListener("storage", onStorage);
+		return () => window.removeEventListener("storage", onStorage);
+	}, []);
 
-		data = await loginUser(payload);
-
+	const login = useCallback(async (payload) => {
+		const data = await loginUser(payload);
 		setUser(data);
 		localStorage.setItem("smart-campus-user", JSON.stringify(data));
 		return data;
-	};
+	}, []);
 
-	const completeOAuthLogin = (payload) => {
+	const completeOAuthLogin = useCallback((payload) => {
 		setUser(payload);
 		localStorage.setItem("smart-campus-user", JSON.stringify(payload));
 		return payload;
-	};
+	}, []);
 
-	const register = async (payload) => {
+	const register = useCallback(async (payload) => {
 		const data = await registerUser(payload);
 		setUser(data);
 		localStorage.setItem("smart-campus-user", JSON.stringify(data));
 		return data;
-	};
+	}, []);
 
-	const logout = () => {
+	const logout = useCallback(() => {
 		setUser(null);
 		localStorage.removeItem("smart-campus-user");
-	};
+	}, []);
 
 	const value = useMemo(
 		() => ({ user, isAuthenticated: Boolean(user), login, register, logout, completeOAuthLogin }),
