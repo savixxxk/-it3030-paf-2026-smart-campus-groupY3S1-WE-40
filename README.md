@@ -175,6 +175,8 @@ To enable the Google sign-in button during local development:
 
 	`http://localhost:8081/login/oauth2/code/google`
 
-3. Restart the frontend dev server (`npm run dev` or `yarn dev`) so Vite picks up the new env variables.
+3. If the login page still hides the button, check `GET /api/auth/oauth2/google/config`. The backend returns `enabled=false` when it only has placeholder Google credentials.
+
+4. Restart the frontend dev server (`npm run dev` or `yarn dev`) so Vite picks up the new env variables.
 
 If you still see the message "Google sign-in is disabled in local development...", double-check that `VITE_ENABLE_GOOGLE_OAUTH` is exactly `true` (string) in your env file and that you restarted the dev server.

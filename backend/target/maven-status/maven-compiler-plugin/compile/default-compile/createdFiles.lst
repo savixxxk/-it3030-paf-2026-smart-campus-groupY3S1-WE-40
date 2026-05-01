@@ -80,6 +80,7 @@ com\campus\smart\model\Ticket.class
 com\campus\smart\controller\ResourceController.class
 com\campus\smart\dto\CommentResponse.class
 com\campus\smart\dto\TicketRejectRequest.class
+com\campus\smart\controller\OAuth2ConfigController.class
 com\campus\smart\repository\LoginAuditRepository.class
 com\campus\smart\model\User.class
 com\campus\smart\SmartCampusProApplication.class
@@ -95,6 +96,7 @@ com\campus\smart\dto\UserDTO.class
 com\campus\smart\enums\BookingStatus.class
 com\campus\smart\service\impl\TicketAttachmentServiceImpl.class
 com\campus\smart\model\NotificationPreference.class
+com\campus\smart\exception\InvalidLoginCredentialsException.class
 com\campus\smart\dto\CommentCreateRequest.class
 com\campus\smart\service\impl\UserServiceImpl.class
 com\campus\smart\dto\NotificationCreateRequest.class

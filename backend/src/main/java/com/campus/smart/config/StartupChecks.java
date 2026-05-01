@@ -15,10 +15,20 @@ public class StartupChecks implements ApplicationRunner {
     @Value("${spring.security.oauth2.client.registration.google.client-id:}")
     private String googleClientId;
 
+    @Value("${spring.security.oauth2.client.registration.google.client-secret:}")
+    private String googleClientSecret;
+
+    @Value("${server.port:8081}")
+    private String serverPort;
+
     @Override
     public void run(ApplicationArguments args) {
-        if (googleClientId == null || googleClientId.isBlank() || googleClientId.contains("placeholder")) {
-            logger.warn("Google OAuth Client ID is not configured or uses a placeholder. Set GOOGLE_CLIENT_ID environment variable before starting the app.");
+        boolean clientIdMissing = googleClientId == null || googleClientId.isBlank() || googleClientId.contains("placeholder");
+        boolean clientSecretMissing = googleClientSecret == null || googleClientSecret.isBlank() || googleClientSecret.contains("placeholder");
+
+        if (clientIdMissing || clientSecretMissing) {
+            logger.warn("Google OAuth is not fully configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET before starting the app.");
+            logger.warn("Google Cloud Console redirect URI should include: http://localhost:{}/login/oauth2/code/google", serverPort);
         } else {
             String masked = googleClientId.length() > 8 ? googleClientId.substring(0, 8) + "..." : googleClientId;
             logger.info("Google OAuth Client ID present: {}", masked);

@@ -23,6 +23,28 @@ export default function AdminNotifications() {
 	const [status, setStatus] = useState("");
 	const [error, setError] = useState("");
 
+	const exportReport = () => {
+		const escapeCsv = (value) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+		const rows = [
+			["Title", "Category", "Priority", "Posted At", "Message"],
+			...notifications.map((item) => [
+				item.title,
+				CATEGORIES[item.category] || item.category,
+				PRIORITIES[item.priority] || item.priority || "Medium",
+				item.createdAt ? new Date(item.createdAt).toLocaleString() : "",
+				item.message
+			])
+		];
+		const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = "smart-campus-notifications-report.csv";
+		link.click();
+		URL.revokeObjectURL(url);
+	};
+
 	useEffect(() => {
 		loadNotifications();
 	}, []);
@@ -57,8 +79,20 @@ export default function AdminNotifications() {
 	return (
 		<section className="space-y-6">
 			<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-				<h2 className="text-2xl font-black text-white">Notifications</h2>
-				<p className="mt-2 text-sm text-slate-300">Upload campus notices so all students can view them in their notifications page.</p>
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+					<div>
+						<h2 className="text-2xl font-black text-white">Notifications</h2>
+						<p className="mt-2 text-sm text-slate-300">Upload campus notices so all students can view them in their notifications page.</p>
+					</div>
+					<button
+						type="button"
+						onClick={exportReport}
+						disabled={!notifications.length}
+						className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						Download Report
+					</button>
+				</div>
 
 				<form onSubmit={handleSubmit} className="mt-6 space-y-4">
 					<div>

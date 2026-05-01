@@ -1,6 +1,7 @@
 package com.campus.smart.controller;
 
 import java.util.Map;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,11 @@ public class UserController {
 		return userService.findByEmail(email)
 				.map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
+	@GetMapping("/admin")
+	public List<UserDTO> getAllUsers() {
+		return userService.findAllUsers();
 	}
 
 	@GetMapping("/health")

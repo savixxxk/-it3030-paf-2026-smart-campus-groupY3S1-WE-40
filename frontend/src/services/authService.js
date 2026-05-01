@@ -28,3 +28,10 @@ export async function loginUser(payload) {
 	});
 	return parseJsonResponse(response);
 }
+
+export async function getGoogleOAuthConfig() {
+	const response = await fetch(`${BASE_URL}/oauth2/google/config`, {
+		credentials: "include"
+	});
+	return parseJsonResponse(response);
+}

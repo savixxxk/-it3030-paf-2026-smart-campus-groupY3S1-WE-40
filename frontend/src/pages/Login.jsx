@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import campusHero from "../assets/campus-real.jpg";
 import { useAuth } from "../context/AuthContext";
+import { getGoogleOAuthConfig } from "../services/authService";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 const ENABLE_GOOGLE_OAUTH = import.meta.env.VITE_ENABLE_GOOGLE_OAUTH === "true";
@@ -13,6 +14,46 @@ export default function Login() {
 	const [form, setForm] = useState({ email: "", password: "" });
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [googleOAuthConfig, setGoogleOAuthConfig] = useState({
+		loading: true,
+		enabled: false,
+		clientIdConfigured: false,
+		clientSecretConfigured: false
+	});
+
+	useEffect(() => {
+		let cancelled = false;
+
+		const loadGoogleOAuthConfig = async () => {
+			try {
+				const config = await getGoogleOAuthConfig();
+				if (!cancelled) {
+					setGoogleOAuthConfig({
+						loading: false,
+						enabled: Boolean(config.enabled),
+						clientIdConfigured: Boolean(config.clientIdConfigured),
+						clientSecretConfigured: Boolean(config.clientSecretConfigured)
+					});
+				}
+			} catch (fetchError) {
+				if (!cancelled) {
+					setGoogleOAuthConfig({
+						loading: false,
+						enabled: false,
+						clientIdConfigured: false,
+						clientSecretConfigured: false
+					});
+					console.error("Failed to load Google OAuth config:", fetchError);
+				}
+			}
+		};
+
+		loadGoogleOAuthConfig();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
 	const onChange = (event) => {
 		setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
@@ -77,6 +118,12 @@ export default function Login() {
 
 						{error ? <p className="text-sm text-red-600">{error}</p> : null}
 
+						{ENABLE_GOOGLE_OAUTH && googleOAuthConfig.loading ? (
+							<p className="rounded-lg border border-slate-700 bg-slate-950/40 px-4 py-3 text-sm text-slate-300">
+								Checking Google sign-in configuration...
+							</p>
+						) : null}
+
 						<button
 							type="submit"
 							disabled={loading}
@@ -85,7 +132,7 @@ export default function Login() {
 							{loading ? "Logging in..." : "Login"}
 						</button>
 
-						{ENABLE_GOOGLE_OAUTH ? (
+						{ENABLE_GOOGLE_OAUTH && googleOAuthConfig.enabled ? (
 							<a
 								href={`${API_BASE}/oauth2/authorization/google`}
 								className="flex w-full items-center justify-center rounded-lg border border-slate-600 bg-slate-950/60 px-4 py-2 font-semibold text-white transition hover:border-cyan-300 hover:bg-slate-900"
@@ -94,7 +141,9 @@ export default function Login() {
 							</a>
 						) : (
 							<p className="rounded-lg border border-slate-700 bg-slate-950/40 px-4 py-3 text-sm text-slate-300">
-								Google sign-in is disabled in local development. Set VITE_ENABLE_GOOGLE_OAUTH=true with real OAuth credentials to enable it.
+								{!ENABLE_GOOGLE_OAUTH
+									? "Google sign-in is disabled in local development. Set VITE_ENABLE_GOOGLE_OAUTH=true with real OAuth credentials to enable it."
+									: "Google sign-in is unavailable because the backend is missing real Google OAuth credentials. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, then restart the backend."}
 							</p>
 						)}
 						</form>

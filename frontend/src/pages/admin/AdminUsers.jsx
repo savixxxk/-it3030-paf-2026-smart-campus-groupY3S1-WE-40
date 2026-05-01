@@ -1,11 +1,55 @@
-import { useMemo, useState } from "react";
-import { users as initialUsers } from "../../data/adminMockData";
+import { useEffect, useMemo, useState } from "react";
+import { getAllUsers } from "../../services/userService";
+
+function downloadCsv(filename, rows) {
+	const escapeCsv = (value) => {
+		const text = value == null ? "" : String(value);
+		return `"${text.replaceAll('"', '""')}"`;
+	};
+
+	const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+	const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = filename;
+	link.click();
+	URL.revokeObjectURL(url);
+}
 
 export default function AdminUsers() {
 	const [search, setSearch] = useState("");
 	const [roleFilter, setRoleFilter] = useState("ALL");
-	const [selectedUserId, setSelectedUserId] = useState(initialUsers[0].id);
-	const [rows, setRows] = useState(initialUsers);
+	const [selectedUserId, setSelectedUserId] = useState(null);
+	const [rows, setRows] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
+
+	useEffect(() => {
+		const loadUsers = async () => {
+			try {
+				setLoading(true);
+				setError("");
+				const data = await getAllUsers();
+				const normalized = data.map((user, index) => ({
+					id: user.id ?? index + 1,
+					name: user.fullName || user.name || "Unknown User",
+					email: user.email,
+					role: user.role || "USER",
+					status: "Active",
+					createdAt: user.createdAt || null
+				}));
+				setRows(normalized);
+				setSelectedUserId((current) => current ?? normalized[0]?.id ?? null);
+			} catch (loadError) {
+				setError(loadError.message || "Failed to load users");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadUsers();
+	}, []);
 
 	const filteredUsers = useMemo(() => {
 		return rows.filter((user) => {
@@ -17,16 +61,17 @@ export default function AdminUsers() {
 
 	const selectedUser = rows.find((user) => user.id === selectedUserId) || filteredUsers[0] || rows[0];
 
-	const updateRole = (userId, role) => {
-		setRows((current) => current.map((user) => (user.id === userId ? { ...user, role } : user)));
-	};
-
-	const toggleStatus = (userId) => {
-		setRows((current) =>
-			current.map((user) =>
-				user.id === userId ? { ...user, status: user.status === "Active" ? "Disabled" : "Active" } : user
-			)
-		);
+	const exportReport = () => {
+		downloadCsv("smart-campus-users-report.csv", [
+			["Name", "Email", "Role", "Status", "Joined"],
+			...filteredUsers.map((user) => [
+				user.name,
+				user.email,
+				user.role,
+				user.status,
+				user.createdAt ? new Date(user.createdAt).toLocaleString() : ""
+			])
+		]);
 	};
 
 	return (
@@ -35,9 +80,17 @@ export default function AdminUsers() {
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 					<div>
 						<h2 className="text-2xl font-black text-white">User Management</h2>
-						<p className="mt-2 text-sm text-slate-300">Search, filter, view, change role, and disable users.</p>
+						<p className="mt-2 text-sm text-slate-300">Search and review registered campus users from the live database.</p>
 					</div>
 					<div className="flex flex-col gap-3 sm:flex-row">
+						<button
+							type="button"
+							onClick={exportReport}
+							disabled={!filteredUsers.length}
+							className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							Download Report
+						</button>
 						<input
 							value={search}
 							onChange={(event) => setSearch(event.target.value)}
@@ -66,13 +119,33 @@ export default function AdminUsers() {
 									<th className="px-6 py-4">Name</th>
 									<th className="px-6 py-4">Email</th>
 									<th className="px-6 py-4">Role</th>
+									<th className="px-6 py-4">Joined</th>
 									<th className="px-6 py-4">Status</th>
 									<th className="px-6 py-4">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
-								{filteredUsers.map((user) => (
-									<tr key={user.id} className="border-b border-white/10 hover:bg-white/5">
+								{loading ? (
+									<tr>
+										<td className="px-6 py-8 text-sm text-slate-300" colSpan={6}>
+											Loading users...
+										</td>
+									</tr>
+								) : error ? (
+									<tr>
+										<td className="px-6 py-8 text-sm text-rose-300" colSpan={6}>
+											{error}
+										</td>
+									</tr>
+								) : filteredUsers.length === 0 ? (
+									<tr>
+										<td className="px-6 py-8 text-sm text-slate-300" colSpan={6}>
+											No users match your search.
+										</td>
+									</tr>
+								) : (
+									filteredUsers.map((user) => (
+										<tr key={user.id} className="border-b border-white/10 hover:bg-white/5">
 										<td className="px-6 py-4 font-semibold text-white">{user.name}</td>
 										<td className="px-6 py-4">{user.email}</td>
 										<td className="px-6 py-4">
@@ -80,8 +153,11 @@ export default function AdminUsers() {
 												{user.role}
 											</span>
 										</td>
+										<td className="px-6 py-4 text-slate-300">
+											{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "--"}
+										</td>
 										<td className="px-6 py-4">
-											<span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.status === "Active" ? "bg-emerald-400/15 text-emerald-200" : "bg-rose-400/15 text-rose-200"}`}>
+											<span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
 												{user.status}
 											</span>
 										</td>
@@ -90,16 +166,10 @@ export default function AdminUsers() {
 												<button onClick={() => setSelectedUserId(user.id)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10">
 													View user
 												</button>
-												<button onClick={() => updateRole(user.id, user.role === "ADMIN" ? "USER" : "ADMIN")} className="rounded-lg bg-cyan-400 px-3 py-1.5 text-xs font-bold text-slate-950 hover:bg-cyan-300">
-													Change role
-												</button>
-												<button onClick={() => toggleStatus(user.id)} className="rounded-lg border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-400/20">
-													Disable user
-												</button>
 											</div>
 										</td>
-									</tr>
-								))}
+										</tr>
+									)))}
 							</tbody>
 						</table>
 					</div>
@@ -112,10 +182,11 @@ export default function AdminUsers() {
 						<p><span className="text-cyan-200">Email:</span> {selectedUser?.email}</p>
 						<p><span className="text-cyan-200">Role:</span> {selectedUser?.role}</p>
 						<p><span className="text-cyan-200">Status:</span> {selectedUser?.status}</p>
+						<p><span className="text-cyan-200">Joined:</span> {selectedUser?.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : "--"}</p>
 					</div>
 					<div className="mt-6 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
 						<p className="font-semibold text-white">User detail panel</p>
-						<p className="mt-2">This panel can later be wired to real backend user records and audit logs.</p>
+						<p className="mt-2">This panel now reflects live registered users from the backend.</p>
 					</div>
 				</div>
 			</div>
