@@ -32,6 +32,10 @@ public class AuthVerificationController {
 			return null;
 		}
 
+		if (user.isBlocked()) {
+			return null;
+		}
+
 		return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
 	}
 

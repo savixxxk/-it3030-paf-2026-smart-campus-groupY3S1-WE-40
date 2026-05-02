@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
 
 public class UserDTO {
 
+	private Long id;
+
 	@NotBlank(message = "Full name is required")
 	private String fullName;
 
@@ -23,6 +25,8 @@ public class UserDTO {
 	private Role role;
 
 	private LocalDateTime createdAt;
+
+	private boolean blocked;
 
 	public String getFullName() {
 		return fullName;
@@ -62,5 +66,21 @@ public class UserDTO {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public void setBlocked(boolean blocked) {
+		this.blocked = blocked;
 	}
 }

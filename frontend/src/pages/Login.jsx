@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import campusHero from "../assets/campus-real.jpg";
 import { useAuth } from "../context/AuthContext";
 import { getGoogleOAuthConfig } from "../services/authService";
@@ -9,6 +9,7 @@ const ENABLE_GOOGLE_OAUTH = import.meta.env.VITE_ENABLE_GOOGLE_OAUTH === "true";
 
 export default function Login() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { login } = useAuth();
 
 	const [form, setForm] = useState({ email: "", password: "" });
@@ -20,6 +21,14 @@ export default function Login() {
 		clientIdConfigured: false,
 		clientSecretConfigured: false
 	});
+
+	useEffect(() => {
+		const params = new URLSearchParams(location.search);
+		const oauthError = params.get("error");
+		if (oauthError) {
+			setError(oauthError);
+		}
+	}, [location.search]);
 
 	useEffect(() => {
 		let cancelled = false;

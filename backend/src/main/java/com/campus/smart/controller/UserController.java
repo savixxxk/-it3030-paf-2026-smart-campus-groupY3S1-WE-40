@@ -1,10 +1,13 @@
 package com.campus.smart.controller;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,8 +33,23 @@ public class UserController {
 	}
 
 	@GetMapping("/admin")
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<UserDTO> getAllUsers() {
 		return userService.findAllUsers();
+	}
+
+	@PostMapping("/{id}/block")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> blockUser(@PathVariable Long id) {
+		boolean ok = userService.blockUser(id);
+		return ok ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+	}
+
+	@PostMapping("/{id}/unblock")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> unblockUser(@PathVariable Long id) {
+		boolean ok = userService.unblockUser(id);
+		return ok ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/health")

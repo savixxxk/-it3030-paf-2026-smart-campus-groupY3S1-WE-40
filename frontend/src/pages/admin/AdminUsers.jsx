@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getAllUsers } from "../../services/userService";
+import { getAllUsers, blockUser, unblockUser } from "../../services/userService";
 
 function downloadCsv(filename, rows) {
 	const escapeCsv = (value) => {
@@ -36,7 +36,8 @@ export default function AdminUsers() {
 					name: user.fullName || user.name || "Unknown User",
 					email: user.email,
 					role: user.role || "USER",
-					status: "Active",
+					blocked: !!user.blocked,
+					status: user.blocked ? "Blocked" : "Active",
 					createdAt: user.createdAt || null
 				}));
 				setRows(normalized);
@@ -157,15 +158,46 @@ export default function AdminUsers() {
 											{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "--"}
 										</td>
 										<td className="px-6 py-4">
-											<span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">
+											<span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.blocked ? "bg-rose-400/15 text-rose-200" : "bg-emerald-400/15 text-emerald-200"}`}>
 												{user.status}
 											</span>
 										</td>
 										<td className="px-6 py-4">
 											<div className="flex flex-wrap gap-2">
-												<button onClick={() => setSelectedUserId(user.id)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10">
+												<button type="button" onClick={() => setSelectedUserId(user.id)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10">
 													View user
 												</button>
+												{user.blocked ? (
+													<button
+														type="button"
+														onClick={async () => {
+														try {
+															await unblockUser(user.id);
+															setRows((prev) => prev.map((r) => (r.id === user.id ? { ...r, blocked: false, status: "Active" } : r)));
+														} catch (err) {
+															console.error(err);
+														}
+													}}
+														className="rounded-lg border border-white/10 bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+													>
+														Unblock
+													</button>
+												) : (
+													<button
+														type="button"
+														onClick={async () => {
+														try {
+															await blockUser(user.id);
+															setRows((prev) => prev.map((r) => (r.id === user.id ? { ...r, blocked: true, status: "Blocked" } : r)));
+														} catch (err) {
+															console.error(err);
+														}
+													}}
+														className="rounded-lg border border-white/10 bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700"
+													>
+														Block
+													</button>
+												)}
 											</div>
 										</td>
 										</tr>
@@ -187,6 +219,39 @@ export default function AdminUsers() {
 					<div className="mt-6 rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-sm text-slate-300">
 						<p className="font-semibold text-white">User detail panel</p>
 						<p className="mt-2">This panel now reflects live registered users from the backend.</p>
+					</div>
+					<div className="mt-4 flex gap-3">
+						{selectedUser && (selectedUser.blocked ? (
+							<button
+								type="button"
+								className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white"
+								onClick={async () => {
+									try {
+										await unblockUser(selectedUser.id);
+										setRows((prev) => prev.map((r) => (r.id === selectedUser.id ? { ...r, blocked: false, status: "Active" } : r)));
+									} catch (err) {
+										console.error(err);
+									}
+								}}
+							>
+								Unblock user
+							</button>
+						) : (
+							<button
+								type="button"
+								className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-bold text-white"
+								onClick={async () => {
+									try {
+										await blockUser(selectedUser.id);
+										setRows((prev) => prev.map((r) => (r.id === selectedUser.id ? { ...r, blocked: true, status: "Blocked" } : r)));
+									} catch (err) {
+										console.error(err);
+									}
+								}}
+							>
+								Block user
+							</button>
+						))}
 					</div>
 				</div>
 			</div>

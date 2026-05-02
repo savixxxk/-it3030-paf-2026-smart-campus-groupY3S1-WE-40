@@ -22,3 +22,19 @@ export async function getAllUsers() {
 	});
 	return parseJsonResponse(response);
 }
+
+export async function blockUser(id) {
+	const response = await fetch(`${BASE_URL}/${id}/block`, {
+		method: "POST",
+		credentials: "include"
+	});
+	return parseJsonResponse(response);
+}
+
+export async function unblockUser(id) {
+	const response = await fetch(`${BASE_URL}/${id}/unblock`, {
+		method: "POST",
+		credentials: "include"
+	});
+	return parseJsonResponse(response);
+}

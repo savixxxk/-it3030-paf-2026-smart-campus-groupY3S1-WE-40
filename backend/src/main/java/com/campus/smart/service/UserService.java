@@ -9,4 +9,8 @@ public interface UserService {
 	Optional<UserDTO> findByEmail(String email);
 
 	List<UserDTO> findAllUsers();
+
+	boolean blockUser(Long id);
+
+	boolean unblockUser(Long id);
 }

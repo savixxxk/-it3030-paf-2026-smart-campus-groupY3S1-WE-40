@@ -75,6 +75,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 			userRepository.save(user);
 		}
 
+		if (user.isBlocked()) {
+			loginAuditService.recordFailure(user.getEmail(), user.getName(), "GOOGLE", "ACCOUNT_BLOCKED");
+			new DefaultRedirectStrategy().sendRedirect(request, response,
+					frontendSuccessUrl + "?oauth=error&message=" + URLEncoder.encode("user blocked", StandardCharsets.UTF_8));
+			return;
+		}
+
 		var authorities = java.util.List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 		var emailAuthentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null, authorities);
 		var context = SecurityContextHolder.createEmptyContext();

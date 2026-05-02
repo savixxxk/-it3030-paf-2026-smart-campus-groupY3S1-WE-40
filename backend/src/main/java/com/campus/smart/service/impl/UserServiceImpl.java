@@ -29,12 +29,32 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    @Override
+    public boolean blockUser(Long id) {
+        return userRepository.findById(id).map(user -> {
+            user.setBlocked(true);
+            userRepository.save(user);
+            return true;
+        }).orElse(false);
+    }
+
+    @Override
+    public boolean unblockUser(Long id) {
+        return userRepository.findById(id).map(user -> {
+            user.setBlocked(false);
+            userRepository.save(user);
+            return true;
+        }).orElse(false);
+    }
+
     private UserDTO toDto(User user) {
         UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
         dto.setFullName(user.getFullName());
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole());
         dto.setCreatedAt(user.getCreatedAt());
+        dto.setBlocked(user.isBlocked());
         return dto;
     }
 }

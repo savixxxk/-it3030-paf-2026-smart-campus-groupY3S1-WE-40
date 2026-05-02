@@ -50,6 +50,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.USER);
+        user.setBlocked(false);
 
         User savedUser = userRepository.save(user);
         return toDto(savedUser);
@@ -77,6 +78,11 @@ public class AuthServiceImpl implements AuthService {
                     return new InvalidLoginCredentialsException("Invalid email or password");
                 });
 
+		if (user.isBlocked()) {
+			loginAuditService.recordFailure(user.getEmail(), user.getName(), "PASSWORD", "ACCOUNT_BLOCKED");
+            throw new InvalidLoginCredentialsException("user blocked");
+		}
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             loginAuditService.recordFailure(user.getEmail(), user.getName(), "PASSWORD", "BAD_PASSWORD");
             throw new InvalidLoginCredentialsException("Invalid email or password");
@@ -92,6 +98,7 @@ public class AuthServiceImpl implements AuthService {
         dto.setFullName(user.getFullName());
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole());
+        dto.setBlocked(user.isBlocked());
         return dto;
     }
 }

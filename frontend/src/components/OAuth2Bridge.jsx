@@ -13,8 +13,9 @@ export default function OAuth2Bridge() {
 
 		if (oauthStatus !== "success") { 
 			if (oauthStatus === "error") {
-				console.error("OAuth error detected in URL");
-				navigate("/login", { replace: true });
+				const message = params.get("message") || "OAuth login failed";
+				console.error("OAuth error detected in URL", message);
+				navigate(`/login?error=${encodeURIComponent(message)}`, { replace: true });
 			}
 			return; 
 		}

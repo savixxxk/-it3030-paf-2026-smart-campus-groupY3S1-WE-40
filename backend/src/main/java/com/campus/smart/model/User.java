@@ -36,6 +36,18 @@ public class User {
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
+	@Column(nullable = false)
+	private boolean blocked = false;
+
+	@Column(nullable = false)
+	private boolean active = true;
+
+	@Column(name = "do_not_disturb", nullable = false)
+	private boolean doNotDisturb = false;
+
+	@Column(name = "login_count", nullable = false)
+	private int loginCount = 0;
+
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = LocalDateTime.now();
@@ -91,5 +103,37 @@ public class User {
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
+	}
+
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public void setBlocked(boolean blocked) {
+		this.blocked = blocked;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public boolean isDoNotDisturb() {
+		return doNotDisturb;
+	}
+
+	public void setDoNotDisturb(boolean doNotDisturb) {
+		this.doNotDisturb = doNotDisturb;
+	}
+
+	public int getLoginCount() {
+		return loginCount;
+	}
+
+	public void setLoginCount(int loginCount) {
+		this.loginCount = loginCount;
 	}
 }
