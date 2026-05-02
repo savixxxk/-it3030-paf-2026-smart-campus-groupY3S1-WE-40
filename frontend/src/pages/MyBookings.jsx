@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { cancelBooking, createBooking, getMyBookings } from "../services/bookingService";
+import { cancelBooking, createBooking, downloadMyBookingsPdf, getMyBookings } from "../services/bookingService";
 import { listResources } from "../services/resourceService";
 
 const emptyForm = {
@@ -16,6 +16,7 @@ export default function MyBookings() {
 	const [bookings, setBookings] = useState([]);
 	const [form, setForm] = useState(emptyForm);
 	const [loading, setLoading] = useState(false);
+	const [pdfLoading, setPdfLoading] = useState(false);
 	const [error, setError] = useState("");
 
 	const selectedResource = useMemo(
@@ -69,6 +70,18 @@ export default function MyBookings() {
 			await refresh();
 		} catch (err) {
 			setError(err?.message || "Cancel failed");
+		}
+	};
+
+	const downloadPdf = async () => {
+		setError("");
+		setPdfLoading(true);
+		try {
+			await downloadMyBookingsPdf();
+		} catch (err) {
+			setError(err?.message || "PDF download failed");
+		} finally {
+			setPdfLoading(false);
 		}
 	};
 
@@ -196,9 +209,19 @@ export default function MyBookings() {
 				</div>
 
 				<div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<h2 className="text-xl font-black text-white">Your bookings</h2>
-						{loading ? <span className="text-xs text-slate-400">Loading…</span> : null}
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={downloadPdf}
+								disabled={pdfLoading}
+								className="rounded-xl border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-200 hover:bg-cyan-400/20 disabled:opacity-50"
+							>
+								{pdfLoading ? "Generating PDF…" : "Download PDF report"}
+							</button>
+							{loading ? <span className="text-xs text-slate-400">Loading…</span> : null}
+						</div>
 					</div>
 					<div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
 						<table className="min-w-[720px] w-full text-left text-sm text-slate-200">

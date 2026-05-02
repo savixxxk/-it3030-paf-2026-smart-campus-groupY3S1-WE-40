@@ -65,3 +65,27 @@ export async function cancelBooking(id) {
 	return parseJsonResponse(response);
 }
 
+/**
+ * Downloads the current user's bookings as a PDF (same data as the "Your bookings" table).
+ */
+export async function downloadMyBookingsPdf() {
+	const response = await fetch(`${BOOKINGS_URL}/my/report/pdf`, {
+		method: "GET",
+		credentials: "include"
+	});
+	if (!response.ok) {
+		const data = await response.json().catch(() => ({}));
+		throw new Error(data.message || data.error || "Failed to download report");
+	}
+	const blob = await response.blob();
+	const url = URL.createObjectURL(blob);
+	const anchor = document.createElement("a");
+	anchor.href = url;
+	anchor.download = "my-bookings-report.pdf";
+	anchor.style.display = "none";
+	document.body.appendChild(anchor);
+	anchor.click();
+	document.body.removeChild(anchor);
+	URL.revokeObjectURL(url);
+}
+
