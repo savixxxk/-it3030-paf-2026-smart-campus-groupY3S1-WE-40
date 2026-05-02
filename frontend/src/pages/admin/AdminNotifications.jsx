@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createNotification, getAdminNotifications } from "../../services/notificationService";
+import { downloadNotificationsReportPdf } from "../../utils/adminReportPdf";
 
 const CATEGORIES = {
 	ACADEMIC_NOTICES: "Academic Notices",
@@ -24,25 +25,11 @@ export default function AdminNotifications() {
 	const [error, setError] = useState("");
 
 	const exportReport = () => {
-		const escapeCsv = (value) => `"${String(value ?? "").replaceAll('"', '""')}"`;
-		const rows = [
-			["Title", "Category", "Priority", "Posted At", "Message"],
-			...notifications.map((item) => [
-				item.title,
-				CATEGORIES[item.category] || item.category,
-				PRIORITIES[item.priority] || item.priority || "Medium",
-				item.createdAt ? new Date(item.createdAt).toLocaleString() : "",
-				item.message
-			])
-		];
-		const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
-		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = "smart-campus-notifications-report.csv";
-		link.click();
-		URL.revokeObjectURL(url);
+		downloadNotificationsReportPdf(notifications.map((item) => ({
+			...item,
+			category: CATEGORIES[item.category] || item.category,
+			priority: PRIORITIES[item.priority] || item.priority || "Medium"
+		})));
 	};
 
 	useEffect(() => {

@@ -1,21 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAllUsers, blockUser, unblockUser } from "../../services/userService";
-
-function downloadCsv(filename, rows) {
-	const escapeCsv = (value) => {
-		const text = value == null ? "" : String(value);
-		return `"${text.replaceAll('"', '""')}"`;
-	};
-
-	const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
-	const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-	const url = URL.createObjectURL(blob);
-	const link = document.createElement("a");
-	link.href = url;
-	link.download = filename;
-	link.click();
-	URL.revokeObjectURL(url);
-}
+import { downloadUsersReportPdf } from "../../utils/adminReportPdf";
 
 export default function AdminUsers() {
 	const [search, setSearch] = useState("");
@@ -63,16 +48,10 @@ export default function AdminUsers() {
 	const selectedUser = rows.find((user) => user.id === selectedUserId) || filteredUsers[0] || rows[0];
 
 	const exportReport = () => {
-		downloadCsv("smart-campus-users-report.csv", [
-			["Name", "Email", "Role", "Status", "Joined"],
-			...filteredUsers.map((user) => [
-				user.name,
-				user.email,
-				user.role,
-				user.status,
-				user.createdAt ? new Date(user.createdAt).toLocaleString() : ""
-			])
-		]);
+		downloadUsersReportPdf(filteredUsers, {
+			search,
+			roleFilter
+		});
 	};
 
 	return (
